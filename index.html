@@ -111,6 +111,12 @@
   .fields-panel .full { grid-column: 1 / 3; }
   .fields-panel .actions { grid-column: 1 / 3; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
   .responsible-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .responsible-row input[type="checkbox"] { width: auto; flex: none; }
+  .responsible-row input[type="text"] { width: auto; flex: 1; }
+  .fields-panel textarea { resize: vertical; max-width: 100%; }
+  .mode-name-row { display: flex; gap: 8px; align-items: center; }
+  .mode-name-row select { width: 110px; flex: none; }
+  .mode-name-row input[type="text"] { flex: 1; }
   .responsible-row input[type=text] { flex: 1; }
 
   .badge { font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
@@ -284,9 +290,9 @@ function ensureGeneralProject() {
   const existing = Object.entries(projects).find(([id, p]) => p.isOthers);
   if (!existing) {
     const ref = db.ref("state/projects").push();
-    ref.set({ name: "General", isOthers: true, order: -1, createdAt: Date.now() });
-  } else if (existing[1].name !== "General") {
-    db.ref("state/projects/" + existing[0] + "/name").set("General");
+    ref.set({ name: "General Tasks", isOthers: true, order: -1, createdAt: Date.now() });
+  } else if (existing[1].name !== "General Tasks") {
+    db.ref("state/projects/" + existing[0] + "/name").set("General Tasks");
   }
 }
 
@@ -402,6 +408,21 @@ function reorderProject(projectId, dir) {
   const [idA, pA] = list[idx]; const [idB, pB] = list[swapIdx];
   db.ref("state/projects/" + idA + "/order").set(pB.order);
   db.ref("state/projects/" + idB + "/order").set(pA.order);
+}
+function renameProject(projectId) {
+  const project = projects[projectId];
+  const newName = prompt("Rename project:", project.name);
+  if (!newName || newName === project.name) return;
+  db.ref("state/projects/" + projectId + "/name").set(newName);
+}
+function deleteProject(projectId) {
+  if (!confirm("Delete this project and all its tasks and subtasks? This cannot be undone.")) return;
+  tasksOfProject(projectId).forEach(([taskId]) => {
+    subtasksOfTask(taskId).forEach(([subId]) => db.ref("state/subtasks/" + subId).remove());
+    db.ref("state/tasks/" + taskId).remove();
+  });
+  db.ref("state/projects/" + projectId).remove();
+  expandedProjects.delete(projectId);
 }
 function collapseProject(projectId) {
   tasksOfProject(projectId).forEach(([taskId]) => {
@@ -544,7 +565,10 @@ function renderProjects() {
     header.className = "project-header";
     header.innerHTML = `
       <span class="name">${escapeHtml(project.name)}</span>
-      ${!project.isOthers ? `<div class="reorder-btns"><button class="btn-icon" data-action="proj-up">&#9650;</button><button class="btn-icon" data-action="proj-down">&#9660;</button></div>` : ""}
+      ${!project.isOthers ? `
+        <button class="btn-icon" data-action="rename-project" title="Rename">&#9998;</button>
+        <button class="btn-icon" data-action="delete-project" title="Delete">&#128465;</button>
+        <div class="reorder-btns"><button class="btn-icon" data-action="proj-up">&#9650;</button><button class="btn-icon" data-action="proj-down">&#9660;</button></div>` : ""}
       <span>${isExpanded ? "&#9650;" : "&#9660;"}</span>
     `;
     header.addEventListener("click", (e) => {
@@ -553,10 +577,14 @@ function renderProjects() {
       else expandedProjects.add(projectId);
       render();
     });
-    header.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener("click", (e) => {
+    header.querySelectorAll('[data-action="proj-up"],[data-action="proj-down"]').forEach(btn => btn.addEventListener("click", (e) => {
       e.stopPropagation();
       reorderProject(projectId, e.target.dataset.action === "proj-up" ? -1 : 1);
     }));
+    const renameProjBtn = header.querySelector('[data-action="rename-project"]');
+    if (renameProjBtn) renameProjBtn.addEventListener("click", (e) => { e.stopPropagation(); renameProject(projectId); });
+    const deleteProjBtn = header.querySelector('[data-action="delete-project"]');
+    if (deleteProjBtn) deleteProjBtn.addEventListener("click", (e) => { e.stopPropagation(); deleteProject(projectId); });
     box.appendChild(header);
 
     if (isExpanded) {
@@ -620,7 +648,17 @@ function renderItemRow(kind, id, item) {
     const mode = itemResponsibleMode(item);
     let responsibleHtml = "";
     if (mode === "single") {
-      responsibleHtml = `<div><label>Responsible</label><input type="text" data-field="responsible" value="${escapeAttr(item.responsible)}" /></div>`;
+      responsibleHtml = `
+        <div class="full">
+          <label>Responsible</label>
+          <div class="mode-name-row">
+            <select data-field="responsibleMode">
+              <option value="single" selected>Single</option>
+              <option value="multiple">Multiple</option>
+            </select>
+            <input type="text" data-field="responsible" value="${escapeAttr(item.responsible)}" placeholder="Name" />
+          </div>
+        </div>`;
     } else {
       const rows = itemResponsibles(item).map((r, idx) => `
         <div class="responsible-row">
@@ -629,22 +667,29 @@ function renderItemRow(kind, id, item) {
           <button class="btn-icon" data-resp-idx="${idx}" data-resp-action="remove">&times;</button>
         </div>
       `).join("");
-      responsibleHtml = `<div class="full"><label>Responsible (multiple)</label>${rows}<button class="btn btn-secondary btn-small" data-action="add-person">+ Add person</button></div>`;
+      responsibleHtml = `
+        <div class="full">
+          <label>Responsible</label>
+          <div class="mode-name-row" style="margin-bottom:8px;">
+            <select data-field="responsibleMode">
+              <option value="single">Single</option>
+              <option value="multiple" selected>Multiple</option>
+            </select>
+          </div>
+          ${rows}
+          <button class="btn btn-secondary btn-small" data-action="add-person">+ Add person</button>
+        </div>`;
     }
     fields.innerHTML = `
-      <div class="full">
-        <label>Responsible mode</label>
-        <select data-field="responsibleMode">
-          <option value="single" ${mode === "single" ? "selected" : ""}>Single</option>
-          <option value="multiple" ${mode === "multiple" ? "selected" : ""}>Multiple</option>
-        </select>
-      </div>
       ${responsibleHtml}
+      <div class="full">
+        <label>URL</label>
+        <input type="text" data-field="url" value="${escapeAttr(item.url)}" placeholder="https://..." />
+        ${item.url ? `<div style="margin-top:4px;"><a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a></div>` : ""}
+      </div>
       <div><label>Deadline</label><input type="date" data-field="deadline" value="${escapeAttr(item.deadline)}" /></div>
-      <div><label>URL</label><input type="text" data-field="url" value="${escapeAttr(item.url)}" placeholder="https://..." /></div>
-      ${item.url ? `<div class="full"><a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a></div>` : ""}
       <div><label>Date done</label><input type="date" data-field="dateDone" value="${escapeAttr(item.dateDone)}" /></div>
-      <div class="full"><label>Notes</label><textarea data-field="notes" rows="2">${escapeHtml(item.notes || "")}</textarea></div>
+      <div class="full"><label>Notes</label><textarea data-field="notes" rows="3">${escapeHtml(item.notes || "")}</textarea></div>
       <div class="actions">
         <button class="btn btn-secondary btn-small" data-action="delete">Delete ${kind === "task" ? "task" : "subtask"}</button>
       </div>
