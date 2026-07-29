@@ -11,6 +11,7 @@
     margin: 0;
     background: #f4f4f0;
     color: #222;
+    font-size: 15px;
   }
   #login-screen {
     display: flex;
@@ -24,10 +25,10 @@
     background: #2f6b3a;
     color: white;
     border: none;
-    padding: 10px 18px;
+    padding: 11px 20px;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 15px;
   }
   #login-screen button:hover, .btn:hover { background: #26582f; }
   .btn-secondary {
@@ -36,40 +37,34 @@
     border: 1px solid #2f6b3a;
   }
   .btn-secondary:hover { background: #eef5ee; }
-  .btn-small {
-    padding: 4px 10px;
-    font-size: 12px;
-  }
+  .btn-small { padding: 6px 12px; font-size: 13px; }
   .btn-icon {
     background: none;
     border: none;
     cursor: pointer;
-    font-size: 14px;
-    padding: 2px 6px;
+    font-size: 15px;
+    padding: 2px 7px;
     color: #666;
   }
   .btn-icon:hover { color: #000; }
-  #error-banner {
-    color: #a33;
-    font-size: 13px;
-  }
+  #error-banner { color: #a33; font-size: 14px; }
   #app { display: none; }
   header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 20px;
+    padding: 16px 28px;
     background: white;
     border-bottom: 1px solid #ddd;
   }
-  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
-  header .user-info { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #555; }
+  header h1 { font-size: 20px; margin: 0; font-weight: 600; }
+  header .user-info { display: flex; align-items: center; gap: 14px; font-size: 14px; color: #555; }
   main {
     display: grid;
-    grid-template-columns: 1.4fr 1fr;
-    gap: 16px;
-    padding: 16px 20px;
-    max-width: 1200px;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 20px;
+    padding: 20px 28px;
+    max-width: 1500px;
     margin: 0 auto;
     align-items: start;
   }
@@ -77,123 +72,68 @@
     background: white;
     border: 1px solid #ddd;
     border-radius: 10px;
-    padding: 14px;
+    padding: 18px;
   }
   .panel-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 14px;
   }
-  .panel-title span { font-size: 13px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.03em; }
+  .panel-title span { font-size: 14px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.03em; }
 
-  .project-box {
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    overflow: hidden;
-  }
+  .project-box { border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
   .project-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    cursor: pointer;
-    background: #fafaf7;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; cursor: pointer; background: #fafaf7;
   }
   .project-header:hover { background: #f0f0ea; }
-  .project-header .name { flex: 1; font-size: 14px; font-weight: 600; }
-  .project-body {
-    padding: 8px 10px 10px;
-    border-top: 1px solid #eee;
-  }
-  .reorder-btns { display: flex; flex-direction: column; gap: 0px; }
-  .reorder-btns button { font-size: 10px; line-height: 1; padding: 1px 3px; }
+  .project-header .name { flex: 1; font-size: 16px; font-weight: 600; }
+  .project-body { padding: 10px 14px 14px; border-top: 1px solid #eee; }
+  .reorder-btns { display: flex; flex-direction: column; }
+  .reorder-btns button { font-size: 11px; line-height: 1; padding: 2px 4px; }
 
-  .task-row {
-    border: 1px solid #e5e5e0;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    background: #fdfdfb;
-  }
-  .task-row-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 8px;
-    cursor: pointer;
-  }
-  .task-row-header .name { flex: 1; font-size: 13px; }
-  .task-row-body {
-    border-top: 1px solid #eee;
-    padding: 6px 8px 8px 26px;
-  }
+  .task-row { border: 1px solid #e5e5e0; border-radius: 6px; margin-bottom: 8px; background: #fdfdfb; }
+  .task-row-header { display: flex; align-items: center; gap: 10px; padding: 9px 12px; cursor: pointer; }
+  .task-row-header .name { flex: 1; font-size: 14.5px; font-weight: 500; }
+  .task-row-body { border-top: 1px solid #eee; padding: 10px 12px 12px 20px; }
 
-  .subtask-row {
-    border: 1px solid #eee;
-    border-radius: 5px;
-    margin-bottom: 5px;
-    background: white;
-  }
-  .subtask-row-header {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 8px;
-    cursor: pointer;
-  }
-  .subtask-row-header .name { flex: 1; font-size: 12.5px; }
-  .subtask-fields {
-    border-top: 1px solid #eee;
-    padding: 8px;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    font-size: 12px;
-  }
-  .subtask-fields label { display: block; color: #666; margin-bottom: 2px; font-size: 11px; }
-  .subtask-fields input, .subtask-fields textarea {
-    width: 100%;
-    font-size: 12px;
-    padding: 4px 6px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-family: inherit;
-  }
-  .subtask-fields .full { grid-column: 1 / 3; }
-  .subtask-fields .actions { grid-column: 1 / 3; display: flex; justify-content: flex-end; }
+  .subtask-row { border: 1px solid #eee; border-radius: 5px; margin-bottom: 6px; background: white; }
+  .subtask-row-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; }
+  .subtask-row-header .name { flex: 1; font-size: 14px; }
+  .meta-inline { font-size: 12px; color: #888; white-space: nowrap; }
 
-  .badge {
-    font-size: 10.5px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: 5px;
-    white-space: nowrap;
+  .fields-panel { border-top: 1px solid #eee; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; }
+  .fields-panel label { display: block; color: #666; margin-bottom: 3px; font-size: 12px; }
+  .fields-panel input, .fields-panel textarea, .fields-panel select {
+    width: 100%; font-size: 13px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit;
   }
+  .fields-panel .full { grid-column: 1 / 3; }
+  .fields-panel .actions { grid-column: 1 / 3; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .responsible-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .responsible-row input[type=text] { flex: 1; }
+
+  .badge { font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
   .badge-overdue { background: #d9c2a3; color: #5c3d1a; }
   .badge-urgent { background: #f3b3b3; color: #7a1f1f; }
   .badge-important { background: #f7e79b; color: #6b5b00; }
   .badge-keep { background: #f0f0ec; color: #888; }
   .badge-done { background: #c8e6c9; color: #1b5e20; }
 
-  .add-btn { margin-top: 4px; }
+  .add-btn { margin-top: 6px; }
 
-  #priority-list .person-group { margin-bottom: 14px; }
-  #priority-list .person-name { font-size: 13px; font-weight: 600; margin: 0 0 6px; }
-  .priority-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid #e5e5e0;
-    border-radius: 6px;
-    padding: 6px 8px;
-    margin-bottom: 5px;
-    font-size: 12.5px;
-  }
-  .priority-item .name { flex: 1; }
-  .priority-item .project-tag { font-size: 10.5px; color: #888; white-space: nowrap; }
+  #priority-list .person-group { margin-bottom: 18px; }
+  #priority-list .person-name { font-size: 14px; font-weight: 600; margin: 0 0 8px; }
+  .priority-item { border: 1px solid #e5e5e0; border-radius: 6px; margin-bottom: 6px; }
+  .priority-item-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; font-size: 13.5px; }
+  .priority-item-header .name { flex: 1; }
+  .priority-item-header .project-tag { font-size: 11.5px; color: #888; white-space: nowrap; }
+  .priority-item-detail { border-top: 1px solid #eee; padding: 10px; font-size: 13px; color: #444; }
+  .priority-item-detail div { margin-bottom: 4px; }
+  .priority-item-detail .label { color: #888; font-size: 11.5px; }
 
-  .empty-note { font-size: 12px; color: #999; padding: 8px 0; }
+  .empty-note { font-size: 13px; color: #999; padding: 10px 0; }
+  a.url-link { color: #2f6b3a; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -248,10 +188,9 @@ const db = firebase.database();
 const ALLOWED_DOMAIN = "growgrounds.org";
 
 // ---------- Standard task/subtask template ----------
-// This is the "gold standard" checklist. To add/edit/delete a standard task,
-// edit this list directly (ask Claude for help), then paste the updated file
-// back into GitHub. Set active:false instead of deleting an entry, so
-// existing projects keep their copy untouched.
+// Edit this list to add/edit/delete standard tasks (ask Claude, then paste
+// the updated file back into GitHub). Set active:false instead of deleting,
+// so existing projects keep their copy untouched.
 const STANDARD_TASKS = [
   { id: "st1", name: "Pre-eligibility", active: true, subtasks: [
     { id: "ss1", name: "Questionary sent and answered" },
@@ -290,6 +229,7 @@ let currentUser = null;
 let expandedProjects = new Set();
 let expandedTasks = new Set();
 let expandedSubtasks = new Set();
+let expandedPriorityItems = new Set();
 
 // ---------- Auth ----------
 document.getElementById("login-btn").addEventListener("click", () => {
@@ -325,7 +265,7 @@ auth.onAuthStateChanged(user => {
 function startListeners() {
   db.ref("state/projects").on("value", snap => {
     projects = snap.val() || {};
-    ensureOthersProject();
+    ensureGeneralProject();
     render();
   });
   db.ref("state/tasks").on("value", snap => {
@@ -340,29 +280,31 @@ function startListeners() {
   });
 }
 
-function ensureOthersProject() {
-  const hasOthers = Object.values(projects).some(p => p.isOthers);
-  if (!hasOthers) {
+function ensureGeneralProject() {
+  const existing = Object.entries(projects).find(([id, p]) => p.isOthers);
+  if (!existing) {
     const ref = db.ref("state/projects").push();
-    ref.set({ name: "Others", isOthers: true, order: -1, createdAt: Date.now() });
+    ref.set({ name: "General", isOthers: true, order: -1, createdAt: Date.now() });
+  } else if (existing[1].name !== "General") {
+    db.ref("state/projects/" + existing[0] + "/name").set("General");
   }
 }
 
 // Propagate standard task/subtask name edits to existing instances,
-// unless that instance is already done ("frozen once done").
+// unless done (frozen) or manually renamed (nameOverridden).
 function syncStandardTaskNames() {
   Object.entries(tasks).forEach(([id, t]) => {
-    if (!t.standardTaskId) return;
+    if (!t.standardTaskId || t.nameOverridden) return;
     const template = STANDARD_TASKS.find(st => st.id === t.standardTaskId);
     if (!template) return;
-    if (t.name !== template.name && !isTaskDone(id)) {
+    if (t.name !== template.name && !t.done) {
       db.ref("state/tasks/" + id + "/name").set(template.name);
     }
   });
 }
 function syncStandardSubtaskNames() {
   Object.entries(subtasks).forEach(([id, s]) => {
-    if (!s.standardSubtaskId) return;
+    if (!s.standardSubtaskId || s.nameOverridden) return;
     let templateSub = null;
     for (const st of STANDARD_TASKS) {
       const found = st.subtasks.find(ss => ss.id === s.standardSubtaskId);
@@ -375,29 +317,39 @@ function syncStandardSubtaskNames() {
   });
 }
 
-// ---------- Helpers ----------
-function subtasksOfTask(taskId) {
-  return Object.entries(subtasks)
-    .filter(([id, s]) => s.taskId === taskId)
-    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+// ---------- Item helpers (shared by tasks and subtasks) ----------
+function defaultItemFields() {
+  return { responsibleMode: "single", responsible: "", responsibles: [], deadline: "", url: "", dateDone: "", notes: "", done: false };
 }
-function tasksOfProject(projectId) {
-  return Object.entries(tasks)
-    .filter(([id, t]) => t.projectId === projectId)
-    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+function itemResponsibleMode(item) { return item.responsibleMode || "single"; }
+function itemResponsibles(item) { return item.responsibles || []; }
+function allResponsiblesDone(item) {
+  const list = itemResponsibles(item);
+  if (list.length === 0) return true;
+  return list.every(r => r.done);
 }
-function isTaskDone(taskId) {
-  const t = tasks[taskId];
-  if (!t) return false;
+function isCheckboxEnabled(kind, id, item) {
+  let enabled = true;
+  if (kind === "task") {
+    const subs = subtasksOfTask(id);
+    if (subs.length > 0) enabled = subs.every(([sid, s]) => s.done);
+  }
+  if (itemResponsibleMode(item) === "multiple") enabled = enabled && allResponsiblesDone(item);
+  return enabled;
+}
+function syncTaskGateAfterSubtaskChange(taskId) {
+  const task = tasks[taskId];
+  if (!task || !task.done) return;
   const subs = subtasksOfTask(taskId);
-  if (subs.length === 0) return !!t.manualDone;
-  return subs.every(([id, s]) => s.done);
+  if (subs.length > 0 && !subs.every(([id, s]) => s.done)) {
+    db.ref("state/tasks/" + taskId + "/done").set(false);
+  }
 }
-function deadlineStatus(subtask) {
-  if (subtask.done) return "done";
-  if (!subtask.deadline) return "keep";
+function deadlineStatus(item) {
+  if (item.done) return "done";
+  if (!item.deadline) return "keep";
   const today = new Date(); today.setHours(0,0,0,0);
-  const deadline = new Date(subtask.deadline + "T00:00:00");
+  const deadline = new Date(item.deadline + "T00:00:00");
   const diffDays = Math.round((deadline - today) / 86400000);
   if (diffDays < 0) return "overdue";
   if (diffDays <= 7) return "urgent";
@@ -405,11 +357,26 @@ function deadlineStatus(subtask) {
   return "keep";
 }
 const STATUS_LABEL = { overdue: "Overdue", urgent: "Urgent", important: "Important", keep: "Keep in mind", done: "Done" };
-function badgeHtml(status) {
-  return `<span class="badge badge-${status}">${STATUS_LABEL[status]}</span>`;
+function badgeHtml(status) { return `<span class="badge badge-${status}">${STATUS_LABEL[status]}</span>`; }
+function responsibleSummary(item) {
+  if (itemResponsibleMode(item) === "multiple") {
+    const list = itemResponsibles(item);
+    if (list.length === 0) return "";
+    return list.map(r => r.name).filter(Boolean).join(", ");
+  }
+  return item.responsible || "";
 }
 
-// ---------- Mutations ----------
+function subtasksOfTask(taskId) {
+  return Object.entries(subtasks).filter(([id, s]) => s.taskId === taskId)
+    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+}
+function tasksOfProject(projectId) {
+  return Object.entries(tasks).filter(([id, t]) => t.projectId === projectId)
+    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+}
+
+// ---------- Mutations: projects ----------
 function addProject() {
   const name = prompt("Project name:");
   if (!name) return;
@@ -420,34 +387,36 @@ function addProject() {
   STANDARD_TASKS.filter(st => st.active).forEach((st, idx) => {
     const taskRef = db.ref("state/tasks").push();
     const taskId = taskRef.key;
-    taskRef.set({ projectId, name: st.name, standardTaskId: st.id, isStandard: true, order: idx, manualDone: false });
+    taskRef.set(Object.assign({ projectId, name: st.name, standardTaskId: st.id, isStandard: true, order: idx, nameOverridden: false }, defaultItemFields()));
     st.subtasks.forEach((ss, sidx) => {
       const subRef = db.ref("state/subtasks").push();
-      subRef.set({
-        taskId, name: ss.name, standardSubtaskId: ss.id, isStandard: true,
-        responsible: "", deadline: "", url: "", dateDone: "", notes: "",
-        done: false, order: sidx, priorityOrder: Date.now() + sidx
-      });
+      subRef.set(Object.assign({ taskId, name: ss.name, standardSubtaskId: ss.id, isStandard: true, order: sidx, priorityOrder: Date.now() + sidx, nameOverridden: false }, defaultItemFields()));
     });
   });
 }
 function reorderProject(projectId, dir) {
-  const list = Object.entries(projects).filter(([id, p]) => !p.isOthers)
-    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+  const list = Object.entries(projects).filter(([id, p]) => !p.isOthers).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
   const idx = list.findIndex(([id]) => id === projectId);
   const swapIdx = idx + dir;
   if (swapIdx < 0 || swapIdx >= list.length) return;
-  const [idA, pA] = list[idx];
-  const [idB, pB] = list[swapIdx];
+  const [idA, pA] = list[idx]; const [idB, pB] = list[swapIdx];
   db.ref("state/projects/" + idA + "/order").set(pB.order);
   db.ref("state/projects/" + idB + "/order").set(pA.order);
 }
+function collapseProject(projectId) {
+  tasksOfProject(projectId).forEach(([taskId]) => {
+    expandedTasks.delete(taskId);
+    subtasksOfTask(taskId).forEach(([subId]) => expandedSubtasks.delete(subId));
+  });
+}
+
+// ---------- Mutations: tasks ----------
 function addTask(projectId) {
   const name = prompt("Task name:");
   if (!name) return;
   const list = tasksOfProject(projectId);
   const maxOrder = Math.max(0, ...list.map(([id, t]) => t.order || 0));
-  db.ref("state/tasks").push().set({ projectId, name, isStandard: false, order: maxOrder + 1, manualDone: false });
+  db.ref("state/tasks").push().set(Object.assign({ projectId, name, isStandard: false, order: maxOrder + 1 }, defaultItemFields()));
 }
 function reorderTask(taskId, dir) {
   const t = tasks[taskId];
@@ -455,25 +424,86 @@ function reorderTask(taskId, dir) {
   const idx = list.findIndex(([id]) => id === taskId);
   const swapIdx = idx + dir;
   if (swapIdx < 0 || swapIdx >= list.length) return;
-  const [idA, tA] = list[idx];
-  const [idB, tB] = list[swapIdx];
+  const [idA, tA] = list[idx]; const [idB, tB] = list[swapIdx];
   db.ref("state/tasks/" + idA + "/order").set(tB.order);
   db.ref("state/tasks/" + idB + "/order").set(tA.order);
 }
-function toggleManualTaskDone(taskId) {
-  const t = tasks[taskId];
-  db.ref("state/tasks/" + taskId + "/manualDone").set(!t.manualDone);
+function collapseTask(taskId) {
+  subtasksOfTask(taskId).forEach(([subId]) => expandedSubtasks.delete(subId));
+}
+function toggleItemDone(kind, id) {
+  const item = kind === "task" ? tasks[id] : subtasks[id];
+  if (!isCheckboxEnabled(kind, id, item)) return;
+  const nowDone = !item.done;
+  db.ref("state/" + kind + "s/" + id).update({ done: nowDone, dateDone: nowDone && !item.dateDone ? new Date().toISOString().slice(0,10) : (item.dateDone || "") });
+  if (kind === "subtask") {
+    const task = tasks[item.taskId];
+    if (task && task.done) {
+      const subs = subtasksOfTask(item.taskId).map(([sid, s]) => sid === id ? [sid, Object.assign({}, s, { done: nowDone })] : [sid, s]);
+      if (!subs.every(([sid, s]) => s.done)) db.ref("state/tasks/" + item.taskId + "/done").set(false);
+    }
+  }
+}
+function updateItemField(kind, id, field, value) {
+  db.ref("state/" + kind + "s/" + id + "/" + field).set(value);
+}
+function renameItem(kind, id) {
+  const item = kind === "task" ? tasks[id] : subtasks[id];
+  const newName = prompt("Rename:", item.name);
+  if (!newName || newName === item.name) return;
+  const updates = { name: newName };
+  if (item.standardTaskId || item.standardSubtaskId) updates.nameOverridden = true;
+  db.ref("state/" + kind + "s/" + id).update(updates);
+}
+function setResponsibleMode(kind, id, mode) {
+  const item = kind === "task" ? tasks[id] : subtasks[id];
+  const updates = { responsibleMode: mode };
+  if (mode === "multiple" && itemResponsibles(item).length === 0 && item.responsible) {
+    updates.responsibles = [{ name: item.responsible, done: false }];
+  }
+  db.ref("state/" + kind + "s/" + id).update(updates);
+}
+function addResponsiblePerson(kind, id) {
+  const item = kind === "task" ? tasks[id] : subtasks[id];
+  const list = itemResponsibles(item).slice();
+  list.push({ name: "", done: false });
+  db.ref("state/" + kind + "s/" + id + "/responsibles").set(list);
+}
+function updateResponsiblePerson(kind, id, idx, field, value) {
+  const item = kind === "task" ? tasks[id] : subtasks[id];
+  const list = itemResponsibles(item).slice();
+  list[idx] = Object.assign({}, list[idx], { [field]: value });
+  db.ref("state/" + kind + "s/" + id + "/responsibles").set(list);
+  if (field === "done" && !value) {
+    db.ref("state/" + kind + "s/" + id + "/done").set(false);
+  }
+}
+function removeResponsiblePerson(kind, id, idx) {
+  const item = kind === "task" ? tasks[id] : subtasks[id];
+  const list = itemResponsibles(item).slice();
+  list.splice(idx, 1);
+  db.ref("state/" + kind + "s/" + id + "/responsibles").set(list);
 }
 function addSubtask(taskId) {
   const name = prompt("Subtask name:");
   if (!name) return;
   const list = subtasksOfTask(taskId);
   const maxOrder = Math.max(0, ...list.map(([id, s]) => s.order || 0));
-  db.ref("state/subtasks").push().set({
-    taskId, name, isStandard: false,
-    responsible: "", deadline: "", url: "", dateDone: "", notes: "",
-    done: false, order: maxOrder + 1, priorityOrder: Date.now()
-  });
+  db.ref("state/subtasks").push().set(Object.assign({ taskId, name, isStandard: false, order: maxOrder + 1, priorityOrder: Date.now() }, defaultItemFields()));
+  const task = tasks[taskId];
+  if (task && task.done) db.ref("state/tasks/" + taskId + "/done").set(false);
+}
+function deleteItem(kind, id) {
+  const label = kind === "task" ? "task" : "subtask";
+  if (!confirm("Delete this " + label + "? This cannot be undone.")) return;
+  if (kind === "task") {
+    subtasksOfTask(id).forEach(([subId]) => db.ref("state/subtasks/" + subId).remove());
+    db.ref("state/tasks/" + id).remove();
+    expandedTasks.delete(id);
+  } else {
+    db.ref("state/subtasks/" + id).remove();
+    expandedSubtasks.delete(id);
+  }
 }
 function reorderSubtask(subtaskId, dir) {
   const s = subtasks[subtaskId];
@@ -481,86 +511,60 @@ function reorderSubtask(subtaskId, dir) {
   const idx = list.findIndex(([id]) => id === subtaskId);
   const swapIdx = idx + dir;
   if (swapIdx < 0 || swapIdx >= list.length) return;
-  const [idA, sA] = list[idx];
-  const [idB, sB] = list[swapIdx];
+  const [idA, sA] = list[idx]; const [idB, sB] = list[swapIdx];
   db.ref("state/subtasks/" + idA + "/order").set(sB.order);
   db.ref("state/subtasks/" + idB + "/order").set(sA.order);
 }
-function toggleSubtaskDone(subtaskId) {
-  const s = subtasks[subtaskId];
-  const nowDone = !s.done;
-  const updates = { done: nowDone };
-  if (nowDone && !s.dateDone) updates.dateDone = new Date().toISOString().slice(0,10);
-  db.ref("state/subtasks/" + subtaskId).update(updates);
-}
-function updateSubtaskField(subtaskId, field, value) {
-  db.ref("state/subtasks/" + subtaskId + "/" + field).set(value);
-}
-function deleteSubtask(subtaskId) {
-  if (!confirm("Delete this subtask? This cannot be undone.")) return;
-  db.ref("state/subtasks/" + subtaskId).remove();
-}
-function reorderPriority(subtaskId, personSubtasks, dir) {
-  const idx = personSubtasks.findIndex(([id]) => id === subtaskId);
+function reorderPriority(subtaskId, taskId, personList, dir) {
+  const idx = personList.findIndex(p => p.id === subtaskId && p.taskId === taskId);
   const swapIdx = idx + dir;
-  if (swapIdx < 0 || swapIdx >= personSubtasks.length) return;
-  const [idA, sA] = personSubtasks[idx];
-  const [idB, sB] = personSubtasks[swapIdx];
-  db.ref("state/subtasks/" + idA + "/priorityOrder").set(sB.priorityOrder);
-  db.ref("state/subtasks/" + idB + "/priorityOrder").set(sA.priorityOrder);
+  if (swapIdx < 0 || swapIdx >= personList.length) return;
+  const a = personList[idx], b = personList[swapIdx];
+  const refA = db.ref("state/" + a.kind + "s/" + a.id + "/priorityOrder");
+  const refB = db.ref("state/" + b.kind + "s/" + b.id + "/priorityOrder");
+  const orderA = a.item.priorityOrder || 0;
+  const orderB = b.item.priorityOrder || 0;
+  refA.set(orderB);
+  refB.set(orderA);
 }
 
 // ---------- Rendering ----------
-function render() {
-  renderProjects();
-  renderPriorities();
-}
+function render() { renderProjects(); renderPriorities(); }
 
 function renderProjects() {
   const container = document.getElementById("projects-list");
   container.innerHTML = "";
-
   const entries = Object.entries(projects).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
   entries.forEach(([projectId, project]) => {
     const box = document.createElement("div");
     box.className = "project-box";
-
+    box.id = "project-" + projectId;
+    const isExpanded = expandedProjects.has(projectId);
     const header = document.createElement("div");
     header.className = "project-header";
-    const isExpanded = expandedProjects.has(projectId);
     header.innerHTML = `
       <span class="name">${escapeHtml(project.name)}</span>
-      ${!project.isOthers ? `
-        <div class="reorder-btns">
-          <button class="btn-icon" data-action="proj-up">&#9650;</button>
-          <button class="btn-icon" data-action="proj-down">&#9660;</button>
-        </div>` : ""}
+      ${!project.isOthers ? `<div class="reorder-btns"><button class="btn-icon" data-action="proj-up">&#9650;</button><button class="btn-icon" data-action="proj-down">&#9660;</button></div>` : ""}
       <span>${isExpanded ? "&#9650;" : "&#9660;"}</span>
     `;
     header.addEventListener("click", (e) => {
-      if (e.target.dataset.action) return;
-      if (expandedProjects.has(projectId)) expandedProjects.delete(projectId);
+      if (e.target.closest('[data-action]')) return;
+      if (expandedProjects.has(projectId)) { expandedProjects.delete(projectId); collapseProject(projectId); }
       else expandedProjects.add(projectId);
       render();
     });
-    header.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        reorderProject(projectId, e.target.dataset.action === "proj-up" ? -1 : 1);
-      });
-    });
+    header.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      reorderProject(projectId, e.target.dataset.action === "proj-up" ? -1 : 1);
+    }));
     box.appendChild(header);
 
     if (isExpanded) {
       const body = document.createElement("div");
       body.className = "project-body";
       const taskList = tasksOfProject(projectId);
-      if (taskList.length === 0) {
-        body.innerHTML = `<div class="empty-note">No tasks yet.</div>`;
-      }
-      taskList.forEach(([taskId, task]) => {
-        body.appendChild(renderTaskRow(taskId, task));
-      });
+      if (taskList.length === 0) body.innerHTML = `<div class="empty-note">No tasks yet.</div>`;
+      taskList.forEach(([taskId, task]) => body.appendChild(renderItemRow("task", taskId, task)));
       const addTaskBtn = document.createElement("button");
       addTaskBtn.className = "btn btn-secondary btn-small add-btn";
       addTaskBtn.textContent = "+ Add task";
@@ -572,117 +576,112 @@ function renderProjects() {
   });
 }
 
-function renderTaskRow(taskId, task) {
+function renderItemRow(kind, id, item) {
   const row = document.createElement("div");
-  row.className = "task-row";
-  const subs = subtasksOfTask(taskId);
-  const done = isTaskDone(taskId);
-  const hasSubs = subs.length > 0;
-  const isExpanded = expandedTasks.has(taskId);
+  row.className = kind === "task" ? "task-row" : "subtask-row";
+  row.id = kind + "-" + id;
+  const expandedSet = kind === "task" ? expandedTasks : expandedSubtasks;
+  const isExpanded = expandedSet.has(id);
+  const status = deadlineStatus(item);
+  const enabled = isCheckboxEnabled(kind, id, item);
+  const respSummary = responsibleSummary(item);
 
   const header = document.createElement("div");
-  header.className = "task-row-header";
+  header.className = kind === "task" ? "task-row-header" : "subtask-row-header";
   header.innerHTML = `
-    <input type="checkbox" ${done ? "checked" : ""} ${hasSubs ? "disabled" : ""} data-role="task-check" />
-    <span class="name">${escapeHtml(task.name)}</span>
-    ${hasSubs ? `<span style="font-size:11px;color:#999;">${subs.filter(([id,s])=>s.done).length}/${subs.length}</span>` : ""}
-    <div class="reorder-btns">
-      <button class="btn-icon" data-action="task-up">&#9650;</button>
-      <button class="btn-icon" data-action="task-down">&#9660;</button>
-    </div>
-    <span data-role="task-toggle">${isExpanded ? "&#9650;" : "&#9660;"}</span>
-  `;
-  header.querySelector('[data-role="task-check"]').addEventListener("click", (e) => {
-    e.stopPropagation();
-    if (!hasSubs) toggleManualTaskDone(taskId);
-  });
-  header.querySelectorAll('[data-action]').forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      reorderTask(taskId, e.target.dataset.action === "task-up" ? -1 : 1);
-    });
-  });
-  header.addEventListener("click", (e) => {
-    if (e.target.closest('[data-role="task-check"]') || e.target.closest('[data-action]')) return;
-    if (expandedTasks.has(taskId)) expandedTasks.delete(taskId);
-    else expandedTasks.add(taskId);
-    render();
-  });
-  row.appendChild(header);
-
-  if (isExpanded) {
-    const body = document.createElement("div");
-    body.className = "task-row-body";
-    if (subs.length === 0) {
-      body.innerHTML = `<div class="empty-note">No subtasks yet.</div>`;
-    }
-    subs.forEach(([subtaskId, sub]) => {
-      body.appendChild(renderSubtaskRow(subtaskId, sub));
-    });
-    const addSubBtn = document.createElement("button");
-    addSubBtn.className = "btn btn-secondary btn-small add-btn";
-    addSubBtn.textContent = "+ Add subtask";
-    addSubBtn.addEventListener("click", () => addSubtask(taskId));
-    body.appendChild(addSubBtn);
-    row.appendChild(body);
-  }
-  return row;
-}
-
-function renderSubtaskRow(subtaskId, sub) {
-  const row = document.createElement("div");
-  row.className = "subtask-row";
-  const isExpanded = expandedSubtasks.has(subtaskId);
-  const status = deadlineStatus(sub);
-
-  const header = document.createElement("div");
-  header.className = "subtask-row-header";
-  header.innerHTML = `
-    <input type="checkbox" ${sub.done ? "checked" : ""} data-role="sub-check" />
-    <span class="name">${escapeHtml(sub.name)}</span>
+    <input type="checkbox" ${item.done ? "checked" : ""} ${enabled ? "" : "disabled"} data-role="check" />
+    <span class="name">${escapeHtml(item.name)}</span>
+    ${respSummary ? `<span class="meta-inline">${escapeHtml(respSummary)}</span>` : ""}
     ${badgeHtml(status)}
-    <div class="reorder-btns">
-      <button class="btn-icon" data-action="sub-up">&#9650;</button>
-      <button class="btn-icon" data-action="sub-down">&#9660;</button>
-    </div>
+    <button class="btn-icon" data-action="rename" title="Rename">&#9998;</button>
+    <div class="reorder-btns"><button class="btn-icon" data-action="item-up">&#9650;</button><button class="btn-icon" data-action="item-down">&#9660;</button></div>
     <span>${isExpanded ? "&#9650;" : "&#9660;"}</span>
   `;
-  header.querySelector('[data-role="sub-check"]').addEventListener("click", (e) => {
-    e.stopPropagation();
-    toggleSubtaskDone(subtaskId);
-  });
-  header.querySelectorAll('[data-action]').forEach(btn => {
+  header.querySelector('[data-role="check"]').addEventListener("click", (e) => { e.stopPropagation(); toggleItemDone(kind, id); });
+  header.querySelector('[data-action="rename"]').addEventListener("click", (e) => { e.stopPropagation(); renameItem(kind, id); });
+  header.querySelectorAll('[data-action="item-up"],[data-action="item-down"]').forEach(btn => {
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      reorderSubtask(subtaskId, e.target.dataset.action === "sub-up" ? -1 : 1);
+      const dir = btn.dataset.action === "item-up" ? -1 : 1;
+      if (kind === "task") reorderTask(id, dir); else reorderSubtask(id, dir);
     });
   });
   header.addEventListener("click", (e) => {
-    if (e.target.closest('[data-role="sub-check"]') || e.target.closest('[data-action]')) return;
-    if (expandedSubtasks.has(subtaskId)) expandedSubtasks.delete(subtaskId);
-    else expandedSubtasks.add(subtaskId);
+    if (e.target.closest('[data-role="check"]') || e.target.closest('[data-action]')) return;
+    if (expandedSet.has(id)) { expandedSet.delete(id); if (kind === "task") collapseTask(id); }
+    else expandedSet.add(id);
     render();
   });
   row.appendChild(header);
 
   if (isExpanded) {
     const fields = document.createElement("div");
-    fields.className = "subtask-fields";
+    fields.className = "fields-panel";
+    const mode = itemResponsibleMode(item);
+    let responsibleHtml = "";
+    if (mode === "single") {
+      responsibleHtml = `<div><label>Responsible</label><input type="text" data-field="responsible" value="${escapeAttr(item.responsible)}" /></div>`;
+    } else {
+      const rows = itemResponsibles(item).map((r, idx) => `
+        <div class="responsible-row">
+          <input type="checkbox" ${r.done ? "checked" : ""} data-resp-idx="${idx}" data-resp-action="check" />
+          <input type="text" value="${escapeAttr(r.name)}" data-resp-idx="${idx}" data-resp-action="name" placeholder="Name" />
+          <button class="btn-icon" data-resp-idx="${idx}" data-resp-action="remove">&times;</button>
+        </div>
+      `).join("");
+      responsibleHtml = `<div class="full"><label>Responsible (multiple)</label>${rows}<button class="btn btn-secondary btn-small" data-action="add-person">+ Add person</button></div>`;
+    }
     fields.innerHTML = `
-      <div><label>Responsible</label><input type="text" data-field="responsible" value="${escapeAttr(sub.responsible)}" /></div>
-      <div><label>Deadline</label><input type="date" data-field="deadline" value="${escapeAttr(sub.deadline)}" /></div>
-      <div><label>URL</label><input type="text" data-field="url" value="${escapeAttr(sub.url)}" /></div>
-      <div><label>Date done</label><input type="date" data-field="dateDone" value="${escapeAttr(sub.dateDone)}" /></div>
-      <div class="full"><label>Notes</label><textarea data-field="notes" rows="2">${escapeHtml(sub.notes || "")}</textarea></div>
-      <div class="actions"><button class="btn btn-secondary btn-small" data-action="delete-sub">Delete subtask</button></div>
+      <div class="full">
+        <label>Responsible mode</label>
+        <select data-field="responsibleMode">
+          <option value="single" ${mode === "single" ? "selected" : ""}>Single</option>
+          <option value="multiple" ${mode === "multiple" ? "selected" : ""}>Multiple</option>
+        </select>
+      </div>
+      ${responsibleHtml}
+      <div><label>Deadline</label><input type="date" data-field="deadline" value="${escapeAttr(item.deadline)}" /></div>
+      <div><label>URL</label><input type="text" data-field="url" value="${escapeAttr(item.url)}" placeholder="https://..." /></div>
+      ${item.url ? `<div class="full"><a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a></div>` : ""}
+      <div><label>Date done</label><input type="date" data-field="dateDone" value="${escapeAttr(item.dateDone)}" /></div>
+      <div class="full"><label>Notes</label><textarea data-field="notes" rows="2">${escapeHtml(item.notes || "")}</textarea></div>
+      <div class="actions">
+        <button class="btn btn-secondary btn-small" data-action="delete">Delete ${kind === "task" ? "task" : "subtask"}</button>
+      </div>
     `;
     fields.querySelectorAll('[data-field]').forEach(input => {
       input.addEventListener("change", (e) => {
-        updateSubtaskField(subtaskId, e.target.dataset.field, e.target.value);
+        const field = e.target.dataset.field;
+        if (field === "responsibleMode") setResponsibleMode(kind, id, e.target.value);
+        else updateItemField(kind, id, field, e.target.value);
       });
     });
-    fields.querySelector('[data-action="delete-sub"]').addEventListener("click", () => deleteSubtask(subtaskId));
+    const delBtn = fields.querySelector('[data-action="delete"]');
+    if (delBtn) delBtn.addEventListener("click", () => deleteItem(kind, id));
+    const addPersonBtn = fields.querySelector('[data-action="add-person"]');
+    if (addPersonBtn) addPersonBtn.addEventListener("click", () => addResponsiblePerson(kind, id));
+    fields.querySelectorAll('[data-resp-action]').forEach(el => {
+      const idx = parseInt(el.dataset.respIdx, 10);
+      const action = el.dataset.respAction;
+      if (action === "check") el.addEventListener("change", (e) => updateResponsiblePerson(kind, id, idx, "done", e.target.checked));
+      if (action === "name") el.addEventListener("change", (e) => updateResponsiblePerson(kind, id, idx, "name", e.target.value));
+      if (action === "remove") el.addEventListener("click", () => removeResponsiblePerson(kind, id, idx));
+    });
     row.appendChild(fields);
+
+    if (kind === "task") {
+      const subBody = document.createElement("div");
+      subBody.className = "task-row-body";
+      const subs = subtasksOfTask(id);
+      if (subs.length === 0) subBody.innerHTML = `<div class="empty-note">No subtasks yet.</div>`;
+      subs.forEach(([subId, sub]) => subBody.appendChild(renderItemRow("subtask", subId, sub)));
+      const addSubBtn = document.createElement("button");
+      addSubBtn.className = "btn btn-secondary btn-small add-btn";
+      addSubBtn.textContent = "+ Add subtask";
+      addSubBtn.addEventListener("click", () => addSubtask(id));
+      subBody.appendChild(addSubBtn);
+      row.appendChild(subBody);
+    }
   }
   return row;
 }
@@ -690,49 +689,103 @@ function renderSubtaskRow(subtaskId, sub) {
 function renderPriorities() {
   const container = document.getElementById("priority-list");
   container.innerHTML = "";
-
   const grouped = {};
+
+  function addEntry(personName, kind, id, item, taskId) {
+    if (!grouped[personName]) grouped[personName] = [];
+    grouped[personName].push({ kind, id, item, taskId, personName });
+  }
+
+  Object.entries(tasks).forEach(([id, t]) => {
+    if (t.done) return;
+    if (itemResponsibleMode(t) === "multiple") {
+      itemResponsibles(t).forEach(r => { if (r.name && !r.done) addEntry(r.name, "task", id, t, null); });
+    } else if (t.responsible) {
+      addEntry(t.responsible, "task", id, t, null);
+    }
+  });
   Object.entries(subtasks).forEach(([id, s]) => {
-    if (!s.responsible || s.done) return;
-    if (!grouped[s.responsible]) grouped[s.responsible] = [];
-    grouped[s.responsible].push([id, s]);
+    if (s.done) return;
+    if (itemResponsibleMode(s) === "multiple") {
+      itemResponsibles(s).forEach(r => { if (r.name && !r.done) addEntry(r.name, "subtask", id, s, s.taskId); });
+    } else if (s.responsible) {
+      addEntry(s.responsible, "subtask", id, s, s.taskId);
+    }
   });
 
   const people = Object.keys(grouped).sort();
   if (people.length === 0) {
-    container.innerHTML = `<div class="empty-note">No open subtasks with a responsible person yet.</div>`;
+    container.innerHTML = `<div class="empty-note">No open items with a responsible person yet.</div>`;
     return;
   }
 
   people.forEach(person => {
-    const list = grouped[person].sort((a, b) => (a[1].priorityOrder || 0) - (b[1].priorityOrder || 0));
+    const list = grouped[person].sort((a, b) => (a.item.priorityOrder || 0) - (b.item.priorityOrder || 0));
     const groupDiv = document.createElement("div");
     groupDiv.className = "person-group";
     groupDiv.innerHTML = `<p class="person-name">${escapeHtml(person)}</p>`;
-    list.forEach(([subtaskId, sub]) => {
-      const task = tasks[sub.taskId];
+    list.forEach(entry => {
+      const { kind, id, item, taskId } = entry;
+      const task = kind === "subtask" ? tasks[taskId] : item;
       const project = task ? projects[task.projectId] : null;
-      const status = deadlineStatus(sub);
-      const item = document.createElement("div");
-      item.className = "priority-item";
-      item.innerHTML = `
-        <span class="name">${escapeHtml(sub.name)}</span>
+      const status = deadlineStatus(item);
+      const key = kind + "-" + id + "-" + person;
+      const isExpanded = expandedPriorityItems.has(key);
+      const wrap = document.createElement("div");
+      wrap.className = "priority-item";
+      const header = document.createElement("div");
+      header.className = "priority-item-header";
+      header.innerHTML = `
+        <span class="name">${escapeHtml(item.name)}</span>
         ${badgeHtml(status)}
         <span class="project-tag">${project ? escapeHtml(project.name) : ""}</span>
-        <div class="reorder-btns">
-          <button class="btn-icon" data-action="pri-up">&#9650;</button>
-          <button class="btn-icon" data-action="pri-down">&#9660;</button>
-        </div>
+        <div class="reorder-btns"><button class="btn-icon" data-action="pri-up">&#9650;</button><button class="btn-icon" data-action="pri-down">&#9660;</button></div>
       `;
-      item.querySelectorAll('[data-action]').forEach(btn => {
-        btn.addEventListener("click", () => {
-          reorderPriority(subtaskId, list, btn.dataset.action === "pri-up" ? -1 : 1);
+      header.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          reorderPriority(id, taskId, list, btn.dataset.action === "pri-up" ? -1 : 1);
         });
       });
-      groupDiv.appendChild(item);
+      header.addEventListener("click", () => {
+        if (expandedPriorityItems.has(key)) expandedPriorityItems.delete(key);
+        else expandedPriorityItems.add(key);
+        render();
+      });
+      wrap.appendChild(header);
+      if (isExpanded) {
+        const detail = document.createElement("div");
+        detail.className = "priority-item-detail";
+        detail.innerHTML = `
+          <div><span class="label">Responsible: </span>${escapeHtml(responsibleSummary(item) || "—")}</div>
+          <div><span class="label">Deadline: </span>${escapeHtml(item.deadline || "—")}</div>
+          <div><span class="label">URL: </span>${item.url ? `<a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a>` : "—"}</div>
+          <div><span class="label">Notes: </span>${escapeHtml(item.notes || "—")}</div>
+          <button class="btn btn-secondary btn-small" data-action="goto">Go to project &#8594;</button>
+        `;
+        detail.querySelector('[data-action="goto"]').addEventListener("click", () => goToItem(kind, id, taskId, task));
+        wrap.appendChild(detail);
+      }
+      groupDiv.appendChild(wrap);
     });
     container.appendChild(groupDiv);
   });
+}
+
+function goToItem(kind, id, taskId, task) {
+  const projectId = task ? task.projectId : null;
+  if (projectId) expandedProjects.add(projectId);
+  if (kind === "subtask") {
+    expandedTasks.add(taskId);
+    expandedSubtasks.add(id);
+  } else {
+    expandedTasks.add(id);
+  }
+  render();
+  setTimeout(() => {
+    const el = document.getElementById((kind === "task" ? "task-" : "subtask-") + id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, 50);
 }
 
 function escapeHtml(str) {
@@ -740,9 +793,7 @@ function escapeHtml(str) {
   div.textContent = str || "";
   return div.innerHTML;
 }
-function escapeAttr(str) {
-  return (str || "").replace(/"/g, "&quot;");
-}
+function escapeAttr(str) { return (str || "").replace(/"/g, "&quot;"); }
 
 document.getElementById("add-project-btn").addEventListener("click", addProject);
 </script>
