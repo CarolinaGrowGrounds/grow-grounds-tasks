@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grow Grounds — Task Coordination</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    margin: 0;
+    background: #f4f4f0;
+    color: #222;
+  }
+  #login-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 16px;
+  }
+  #login-screen button, .btn {
+    background: #2f6b3a;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  #login-screen button:hover, .btn:hover { background: #26582f; }
+  .btn-secondary {
+    background: white;
+    color: #2f6b3a;
+    border: 1px solid #2f6b3a;
+  }
+  .btn-secondary:hover { background: #eef5ee; }
+  .btn-small {
+    padding: 4px 10px;
+    font-size: 12px;
+  }
+  .btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    color: #666;
+  }
+  .btn-icon:hover { color: #000; }
+  #error-banner {
+    color: #a33;
+    font-size: 13px;
+  }
+  #app { display: none; }
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: white;
+    border-bottom: 1px solid #ddd;
+  }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  header .user-info { display: flex; align-items: center; gap: 12px; font-size: 13px; color: #555; }
+  main {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 16px;
+    padding: 16px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    align-items: start;
+  }
+  .panel {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 14px;
+  }
+  .panel-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  .panel-title span { font-size: 13px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  .project-box {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .project-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    background: #fafaf7;
+  }
+  .project-header:hover { background: #f0f0ea; }
+  .project-header .name { flex: 1; font-size: 14px; font-weight: 600; }
+  .project-body {
+    padding: 8px 10px 10px;
+    border-top: 1px solid #eee;
+  }
+  .reorder-btns { display: flex; flex-direction: column; gap: 0px; }
+  .reorder-btns button { font-size: 10px; line-height: 1; padding: 1px 3px; }
+
+  .task-row {
+    border: 1px solid #e5e5e0;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    background: #fdfdfb;
+  }
+  .task-row-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+  }
+  .task-row-header .name { flex: 1; font-size: 13px; }
+  .task-row-body {
+    border-top: 1px solid #eee;
+    padding: 6px 8px 8px 26px;
+  }
+
+  .subtask-row {
+    border: 1px solid #eee;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    background: white;
+  }
+  .subtask-row-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    cursor: pointer;
+  }
+  .subtask-row-header .name { flex: 1; font-size: 12.5px; }
+  .subtask-fields {
+    border-top: 1px solid #eee;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    font-size: 12px;
+  }
+  .subtask-fields label { display: block; color: #666; margin-bottom: 2px; font-size: 11px; }
+  .subtask-fields input, .subtask-fields textarea {
+    width: 100%;
+    font-size: 12px;
+    padding: 4px 6px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  .subtask-fields .full { grid-column: 1 / 3; }
+  .subtask-fields .actions { grid-column: 1 / 3; display: flex; justify-content: flex-end; }
+
+  .badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 5px;
+    white-space: nowrap;
+  }
+  .badge-overdue { background: #d9c2a3; color: #5c3d1a; }
+  .badge-urgent { background: #f3b3b3; color: #7a1f1f; }
+  .badge-important { background: #f7e79b; color: #6b5b00; }
+  .badge-keep { background: #f0f0ec; color: #888; }
+  .badge-done { background: #c8e6c9; color: #1b5e20; }
+
+  .add-btn { margin-top: 4px; }
+
+  #priority-list .person-group { margin-bottom: 14px; }
+  #priority-list .person-name { font-size: 13px; font-weight: 600; margin: 0 0 6px; }
+  .priority-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #e5e5e0;
+    border-radius: 6px;
+    padding: 6px 8px;
+    margin-bottom: 5px;
+    font-size: 12.5px;
+  }
+  .priority-item .name { flex: 1; }
+  .priority-item .project-tag { font-size: 10.5px; color: #888; white-space: nowrap; }
+
+  .empty-note { font-size: 12px; color: #999; padding: 8px 0; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <h1>Grow Grounds — Task Coordination</h1>
+  <button id="login-btn">Sign in with Google</button>
+  <div id="error-banner"></div>
+</div>
+
+<div id="app">
+  <header>
+    <h1>Grow Grounds — Task Coordination</h1>
+    <div class="user-info">
+      <span id="user-email"></span>
+      <button class="btn btn-secondary btn-small" id="signout-btn">Sign out</button>
+    </div>
+  </header>
+  <main>
+    <div class="panel">
+      <div class="panel-title">
+        <span>Projects</span>
+        <button class="btn btn-small" id="add-project-btn">+ Add project</button>
+      </div>
+      <div id="projects-list"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title"><span>Priorities by person</span></div>
+      <div id="priority-list"></div>
+    </div>
+  </main>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+// ---------- Firebase setup ----------
+const firebaseConfig = {
+  apiKey: "AIzaSyBR_2hJsWxVPysMR5WM52viie0nLw81w14",
+  authDomain: "task-tracker-43ec2.firebaseapp.com",
+  databaseURL: "https://task-tracker-43ec2-default-rtdb.firebaseio.com",
+  projectId: "task-tracker-43ec2",
+  storageBucket: "task-tracker-43ec2.firebasestorage.app",
+  messagingSenderId: "960268998510",
+  appId: "1:960268998510:web:87802ede5d057994c0937f"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+const ALLOWED_DOMAIN = "growgrounds.org";
+
+// ---------- Standard task/subtask template ----------
+// This is the "gold standard" checklist. To add/edit/delete a standard task,
+// edit this list directly (ask Claude for help), then paste the updated file
+// back into GitHub. Set active:false instead of deleting an entry, so
+// existing projects keep their copy untouched.
+const STANDARD_TASKS = [
+  { id: "st1", name: "Pre-eligibility", active: true, subtasks: [
+    { id: "ss1", name: "Questionary sent and answered" },
+    { id: "ss2", name: "Initial eligibility assessment" },
+    { id: "ss3", name: "Preliminary planting design" },
+    { id: "ss4", name: "Carbon estimations" },
+    { id: "ss5", name: "Decision" }
+  ]},
+  { id: "st2", name: "Partnership set up", active: true, subtasks: [] },
+  { id: "st3", name: "Local Stakeholder Consultation", active: true, subtasks: [] },
+  { id: "st4", name: "Contracts", active: true, subtasks: [
+    { id: "ss6", name: "Implementation contract" },
+    { id: "ss7", name: "Carbon contract" }
+  ]},
+  { id: "st5", name: "Polygons", active: true, subtasks: [
+    { id: "ss8", name: "Revision of boundaries" },
+    { id: "ss9", name: "Land title" },
+    { id: "ss10", name: "Forest/Non Forest analysis" }
+  ]},
+  { id: "st6", name: "Farmer onboarding", active: true, subtasks: [] },
+  { id: "st7", name: "Planting design", active: true, subtasks: [] },
+  { id: "st8", name: "Seedling distribution", active: true, subtasks: [] },
+  { id: "st9", name: "Carbon calculations", active: true, subtasks: [] },
+  { id: "st10", name: "Baseline", active: true, subtasks: [] },
+  { id: "st11", name: "Training", active: true, subtasks: [] },
+  { id: "st12", name: "MRV", active: true, subtasks: [] },
+  { id: "st13", name: "Validation", active: true, subtasks: [] },
+  { id: "st14", name: "Certification", active: true, subtasks: [] }
+];
+
+// ---------- App state ----------
+let projects = {};
+let tasks = {};
+let subtasks = {};
+let currentUser = null;
+let expandedProjects = new Set();
+let expandedTasks = new Set();
+let expandedSubtasks = new Set();
+
+// ---------- Auth ----------
+document.getElementById("login-btn").addEventListener("click", () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider).catch(err => {
+    document.getElementById("error-banner").textContent = "Sign-in failed: " + err.message;
+  });
+});
+document.getElementById("signout-btn").addEventListener("click", () => auth.signOut());
+
+auth.onAuthStateChanged(user => {
+  const errorBanner = document.getElementById("error-banner");
+  if (user) {
+    if (!user.email.endsWith("@" + ALLOWED_DOMAIN)) {
+      errorBanner.textContent = "Access restricted to @" + ALLOWED_DOMAIN + " accounts.";
+      auth.signOut();
+      return;
+    }
+    currentUser = user;
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("user-email").textContent = user.email;
+    errorBanner.textContent = "";
+    startListeners();
+  } else {
+    currentUser = null;
+    document.getElementById("login-screen").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+  }
+});
+
+// ---------- Data listeners ----------
+function startListeners() {
+  db.ref("state/projects").on("value", snap => {
+    projects = snap.val() || {};
+    ensureOthersProject();
+    render();
+  });
+  db.ref("state/tasks").on("value", snap => {
+    tasks = snap.val() || {};
+    syncStandardTaskNames();
+    render();
+  });
+  db.ref("state/subtasks").on("value", snap => {
+    subtasks = snap.val() || {};
+    syncStandardSubtaskNames();
+    render();
+  });
+}
+
+function ensureOthersProject() {
+  const hasOthers = Object.values(projects).some(p => p.isOthers);
+  if (!hasOthers) {
+    const ref = db.ref("state/projects").push();
+    ref.set({ name: "Others", isOthers: true, order: -1, createdAt: Date.now() });
+  }
+}
+
+// Propagate standard task/subtask name edits to existing instances,
+// unless that instance is already done ("frozen once done").
+function syncStandardTaskNames() {
+  Object.entries(tasks).forEach(([id, t]) => {
+    if (!t.standardTaskId) return;
+    const template = STANDARD_TASKS.find(st => st.id === t.standardTaskId);
+    if (!template) return;
+    if (t.name !== template.name && !isTaskDone(id)) {
+      db.ref("state/tasks/" + id + "/name").set(template.name);
+    }
+  });
+}
+function syncStandardSubtaskNames() {
+  Object.entries(subtasks).forEach(([id, s]) => {
+    if (!s.standardSubtaskId) return;
+    let templateSub = null;
+    for (const st of STANDARD_TASKS) {
+      const found = st.subtasks.find(ss => ss.id === s.standardSubtaskId);
+      if (found) { templateSub = found; break; }
+    }
+    if (!templateSub) return;
+    if (s.name !== templateSub.name && !s.done) {
+      db.ref("state/subtasks/" + id + "/name").set(templateSub.name);
+    }
+  });
+}
+
+// ---------- Helpers ----------
+function subtasksOfTask(taskId) {
+  return Object.entries(subtasks)
+    .filter(([id, s]) => s.taskId === taskId)
+    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+}
+function tasksOfProject(projectId) {
+  return Object.entries(tasks)
+    .filter(([id, t]) => t.projectId === projectId)
+    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+}
+function isTaskDone(taskId) {
+  const t = tasks[taskId];
+  if (!t) return false;
+  const subs = subtasksOfTask(taskId);
+  if (subs.length === 0) return !!t.manualDone;
+  return subs.every(([id, s]) => s.done);
+}
+function deadlineStatus(subtask) {
+  if (subtask.done) return "done";
+  if (!subtask.deadline) return "keep";
+  const today = new Date(); today.setHours(0,0,0,0);
+  const deadline = new Date(subtask.deadline + "T00:00:00");
+  const diffDays = Math.round((deadline - today) / 86400000);
+  if (diffDays < 0) return "overdue";
+  if (diffDays <= 7) return "urgent";
+  if (diffDays <= 30) return "important";
+  return "keep";
+}
+const STATUS_LABEL = { overdue: "Overdue", urgent: "Urgent", important: "Important", keep: "Keep in mind", done: "Done" };
+function badgeHtml(status) {
+  return `<span class="badge badge-${status}">${STATUS_LABEL[status]}</span>`;
+}
+
+// ---------- Mutations ----------
+function addProject() {
+  const name = prompt("Project name:");
+  if (!name) return;
+  const maxOrder = Math.max(0, ...Object.values(projects).map(p => p.order || 0));
+  const projRef = db.ref("state/projects").push();
+  const projectId = projRef.key;
+  projRef.set({ name, isOthers: false, order: maxOrder + 1, createdAt: Date.now() });
+  STANDARD_TASKS.filter(st => st.active).forEach((st, idx) => {
+    const taskRef = db.ref("state/tasks").push();
+    const taskId = taskRef.key;
+    taskRef.set({ projectId, name: st.name, standardTaskId: st.id, isStandard: true, order: idx, manualDone: false });
+    st.subtasks.forEach((ss, sidx) => {
+      const subRef = db.ref("state/subtasks").push();
+      subRef.set({
+        taskId, name: ss.name, standardSubtaskId: ss.id, isStandard: true,
+        responsible: "", deadline: "", url: "", dateDone: "", notes: "",
+        done: false, order: sidx, priorityOrder: Date.now() + sidx
+      });
+    });
+  });
+}
+function reorderProject(projectId, dir) {
+  const list = Object.entries(projects).filter(([id, p]) => !p.isOthers)
+    .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+  const idx = list.findIndex(([id]) => id === projectId);
+  const swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= list.length) return;
+  const [idA, pA] = list[idx];
+  const [idB, pB] = list[swapIdx];
+  db.ref("state/projects/" + idA + "/order").set(pB.order);
+  db.ref("state/projects/" + idB + "/order").set(pA.order);
+}
+function addTask(projectId) {
+  const name = prompt("Task name:");
+  if (!name) return;
+  const list = tasksOfProject(projectId);
+  const maxOrder = Math.max(0, ...list.map(([id, t]) => t.order || 0));
+  db.ref("state/tasks").push().set({ projectId, name, isStandard: false, order: maxOrder + 1, manualDone: false });
+}
+function reorderTask(taskId, dir) {
+  const t = tasks[taskId];
+  const list = tasksOfProject(t.projectId);
+  const idx = list.findIndex(([id]) => id === taskId);
+  const swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= list.length) return;
+  const [idA, tA] = list[idx];
+  const [idB, tB] = list[swapIdx];
+  db.ref("state/tasks/" + idA + "/order").set(tB.order);
+  db.ref("state/tasks/" + idB + "/order").set(tA.order);
+}
+function toggleManualTaskDone(taskId) {
+  const t = tasks[taskId];
+  db.ref("state/tasks/" + taskId + "/manualDone").set(!t.manualDone);
+}
+function addSubtask(taskId) {
+  const name = prompt("Subtask name:");
+  if (!name) return;
+  const list = subtasksOfTask(taskId);
+  const maxOrder = Math.max(0, ...list.map(([id, s]) => s.order || 0));
+  db.ref("state/subtasks").push().set({
+    taskId, name, isStandard: false,
+    responsible: "", deadline: "", url: "", dateDone: "", notes: "",
+    done: false, order: maxOrder + 1, priorityOrder: Date.now()
+  });
+}
+function reorderSubtask(subtaskId, dir) {
+  const s = subtasks[subtaskId];
+  const list = subtasksOfTask(s.taskId);
+  const idx = list.findIndex(([id]) => id === subtaskId);
+  const swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= list.length) return;
+  const [idA, sA] = list[idx];
+  const [idB, sB] = list[swapIdx];
+  db.ref("state/subtasks/" + idA + "/order").set(sB.order);
+  db.ref("state/subtasks/" + idB + "/order").set(sA.order);
+}
+function toggleSubtaskDone(subtaskId) {
+  const s = subtasks[subtaskId];
+  const nowDone = !s.done;
+  const updates = { done: nowDone };
+  if (nowDone && !s.dateDone) updates.dateDone = new Date().toISOString().slice(0,10);
+  db.ref("state/subtasks/" + subtaskId).update(updates);
+}
+function updateSubtaskField(subtaskId, field, value) {
+  db.ref("state/subtasks/" + subtaskId + "/" + field).set(value);
+}
+function deleteSubtask(subtaskId) {
+  if (!confirm("Delete this subtask? This cannot be undone.")) return;
+  db.ref("state/subtasks/" + subtaskId).remove();
+}
+function reorderPriority(subtaskId, personSubtasks, dir) {
+  const idx = personSubtasks.findIndex(([id]) => id === subtaskId);
+  const swapIdx = idx + dir;
+  if (swapIdx < 0 || swapIdx >= personSubtasks.length) return;
+  const [idA, sA] = personSubtasks[idx];
+  const [idB, sB] = personSubtasks[swapIdx];
+  db.ref("state/subtasks/" + idA + "/priorityOrder").set(sB.priorityOrder);
+  db.ref("state/subtasks/" + idB + "/priorityOrder").set(sA.priorityOrder);
+}
+
+// ---------- Rendering ----------
+function render() {
+  renderProjects();
+  renderPriorities();
+}
+
+function renderProjects() {
+  const container = document.getElementById("projects-list");
+  container.innerHTML = "";
+
+  const entries = Object.entries(projects).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+  entries.forEach(([projectId, project]) => {
+    const box = document.createElement("div");
+    box.className = "project-box";
+
+    const header = document.createElement("div");
+    header.className = "project-header";
+    const isExpanded = expandedProjects.has(projectId);
+    header.innerHTML = `
+      <span class="name">${escapeHtml(project.name)}</span>
+      ${!project.isOthers ? `
+        <div class="reorder-btns">
+          <button class="btn-icon" data-action="proj-up">&#9650;</button>
+          <button class="btn-icon" data-action="proj-down">&#9660;</button>
+        </div>` : ""}
+      <span>${isExpanded ? "&#9650;" : "&#9660;"}</span>
+    `;
+    header.addEventListener("click", (e) => {
+      if (e.target.dataset.action) return;
+      if (expandedProjects.has(projectId)) expandedProjects.delete(projectId);
+      else expandedProjects.add(projectId);
+      render();
+    });
+    header.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        reorderProject(projectId, e.target.dataset.action === "proj-up" ? -1 : 1);
+      });
+    });
+    box.appendChild(header);
+
+    if (isExpanded) {
+      const body = document.createElement("div");
+      body.className = "project-body";
+      const taskList = tasksOfProject(projectId);
+      if (taskList.length === 0) {
+        body.innerHTML = `<div class="empty-note">No tasks yet.</div>`;
+      }
+      taskList.forEach(([taskId, task]) => {
+        body.appendChild(renderTaskRow(taskId, task));
+      });
+      const addTaskBtn = document.createElement("button");
+      addTaskBtn.className = "btn btn-secondary btn-small add-btn";
+      addTaskBtn.textContent = "+ Add task";
+      addTaskBtn.addEventListener("click", () => addTask(projectId));
+      body.appendChild(addTaskBtn);
+      box.appendChild(body);
+    }
+    container.appendChild(box);
+  });
+}
+
+function renderTaskRow(taskId, task) {
+  const row = document.createElement("div");
+  row.className = "task-row";
+  const subs = subtasksOfTask(taskId);
+  const done = isTaskDone(taskId);
+  const hasSubs = subs.length > 0;
+  const isExpanded = expandedTasks.has(taskId);
+
+  const header = document.createElement("div");
+  header.className = "task-row-header";
+  header.innerHTML = `
+    <input type="checkbox" ${done ? "checked" : ""} ${hasSubs ? "disabled" : ""} data-role="task-check" />
+    <span class="name">${escapeHtml(task.name)}</span>
+    ${hasSubs ? `<span style="font-size:11px;color:#999;">${subs.filter(([id,s])=>s.done).length}/${subs.length}</span>` : ""}
+    <div class="reorder-btns">
+      <button class="btn-icon" data-action="task-up">&#9650;</button>
+      <button class="btn-icon" data-action="task-down">&#9660;</button>
+    </div>
+    <span data-role="task-toggle">${isExpanded ? "&#9650;" : "&#9660;"}</span>
+  `;
+  header.querySelector('[data-role="task-check"]').addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!hasSubs) toggleManualTaskDone(taskId);
+  });
+  header.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      reorderTask(taskId, e.target.dataset.action === "task-up" ? -1 : 1);
+    });
+  });
+  header.addEventListener("click", (e) => {
+    if (e.target.closest('[data-role="task-check"]') || e.target.closest('[data-action]')) return;
+    if (expandedTasks.has(taskId)) expandedTasks.delete(taskId);
+    else expandedTasks.add(taskId);
+    render();
+  });
+  row.appendChild(header);
+
+  if (isExpanded) {
+    const body = document.createElement("div");
+    body.className = "task-row-body";
+    if (subs.length === 0) {
+      body.innerHTML = `<div class="empty-note">No subtasks yet.</div>`;
+    }
+    subs.forEach(([subtaskId, sub]) => {
+      body.appendChild(renderSubtaskRow(subtaskId, sub));
+    });
+    const addSubBtn = document.createElement("button");
+    addSubBtn.className = "btn btn-secondary btn-small add-btn";
+    addSubBtn.textContent = "+ Add subtask";
+    addSubBtn.addEventListener("click", () => addSubtask(taskId));
+    body.appendChild(addSubBtn);
+    row.appendChild(body);
+  }
+  return row;
+}
+
+function renderSubtaskRow(subtaskId, sub) {
+  const row = document.createElement("div");
+  row.className = "subtask-row";
+  const isExpanded = expandedSubtasks.has(subtaskId);
+  const status = deadlineStatus(sub);
+
+  const header = document.createElement("div");
+  header.className = "subtask-row-header";
+  header.innerHTML = `
+    <input type="checkbox" ${sub.done ? "checked" : ""} data-role="sub-check" />
+    <span class="name">${escapeHtml(sub.name)}</span>
+    ${badgeHtml(status)}
+    <div class="reorder-btns">
+      <button class="btn-icon" data-action="sub-up">&#9650;</button>
+      <button class="btn-icon" data-action="sub-down">&#9660;</button>
+    </div>
+    <span>${isExpanded ? "&#9650;" : "&#9660;"}</span>
+  `;
+  header.querySelector('[data-role="sub-check"]').addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleSubtaskDone(subtaskId);
+  });
+  header.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      reorderSubtask(subtaskId, e.target.dataset.action === "sub-up" ? -1 : 1);
+    });
+  });
+  header.addEventListener("click", (e) => {
+    if (e.target.closest('[data-role="sub-check"]') || e.target.closest('[data-action]')) return;
+    if (expandedSubtasks.has(subtaskId)) expandedSubtasks.delete(subtaskId);
+    else expandedSubtasks.add(subtaskId);
+    render();
+  });
+  row.appendChild(header);
+
+  if (isExpanded) {
+    const fields = document.createElement("div");
+    fields.className = "subtask-fields";
+    fields.innerHTML = `
+      <div><label>Responsible</label><input type="text" data-field="responsible" value="${escapeAttr(sub.responsible)}" /></div>
+      <div><label>Deadline</label><input type="date" data-field="deadline" value="${escapeAttr(sub.deadline)}" /></div>
+      <div><label>URL</label><input type="text" data-field="url" value="${escapeAttr(sub.url)}" /></div>
+      <div><label>Date done</label><input type="date" data-field="dateDone" value="${escapeAttr(sub.dateDone)}" /></div>
+      <div class="full"><label>Notes</label><textarea data-field="notes" rows="2">${escapeHtml(sub.notes || "")}</textarea></div>
+      <div class="actions"><button class="btn btn-secondary btn-small" data-action="delete-sub">Delete subtask</button></div>
+    `;
+    fields.querySelectorAll('[data-field]').forEach(input => {
+      input.addEventListener("change", (e) => {
+        updateSubtaskField(subtaskId, e.target.dataset.field, e.target.value);
+      });
+    });
+    fields.querySelector('[data-action="delete-sub"]').addEventListener("click", () => deleteSubtask(subtaskId));
+    row.appendChild(fields);
+  }
+  return row;
+}
+
+function renderPriorities() {
+  const container = document.getElementById("priority-list");
+  container.innerHTML = "";
+
+  const grouped = {};
+  Object.entries(subtasks).forEach(([id, s]) => {
+    if (!s.responsible || s.done) return;
+    if (!grouped[s.responsible]) grouped[s.responsible] = [];
+    grouped[s.responsible].push([id, s]);
+  });
+
+  const people = Object.keys(grouped).sort();
+  if (people.length === 0) {
+    container.innerHTML = `<div class="empty-note">No open subtasks with a responsible person yet.</div>`;
+    return;
+  }
+
+  people.forEach(person => {
+    const list = grouped[person].sort((a, b) => (a[1].priorityOrder || 0) - (b[1].priorityOrder || 0));
+    const groupDiv = document.createElement("div");
+    groupDiv.className = "person-group";
+    groupDiv.innerHTML = `<p class="person-name">${escapeHtml(person)}</p>`;
+    list.forEach(([subtaskId, sub]) => {
+      const task = tasks[sub.taskId];
+      const project = task ? projects[task.projectId] : null;
+      const status = deadlineStatus(sub);
+      const item = document.createElement("div");
+      item.className = "priority-item";
+      item.innerHTML = `
+        <span class="name">${escapeHtml(sub.name)}</span>
+        ${badgeHtml(status)}
+        <span class="project-tag">${project ? escapeHtml(project.name) : ""}</span>
+        <div class="reorder-btns">
+          <button class="btn-icon" data-action="pri-up">&#9650;</button>
+          <button class="btn-icon" data-action="pri-down">&#9660;</button>
+        </div>
+      `;
+      item.querySelectorAll('[data-action]').forEach(btn => {
+        btn.addEventListener("click", () => {
+          reorderPriority(subtaskId, list, btn.dataset.action === "pri-up" ? -1 : 1);
+        });
+      });
+      groupDiv.appendChild(item);
+    });
+    container.appendChild(groupDiv);
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str || "";
+  return div.innerHTML;
+}
+function escapeAttr(str) {
+  return (str || "").replace(/"/g, "&quot;");
+}
+
+document.getElementById("add-project-btn").addEventListener("click", addProject);
+</script>
+</body>
+</html>
