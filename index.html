@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Grow Grounds — Task Coordination</title>
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 <style>
   * { box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; background: #f4f4f0; color: #222; font-size: 15px; }
@@ -86,6 +87,11 @@
 
   .empty-note { font-size: 13px; color: #999; padding: 10px 0; }
   a.url-link { color: #2f6b3a; text-decoration: underline; }
+  .done-date { font-size: 12px; color: #1b5e20; font-weight: 500; }
+  .ql-container { background: white; font-size: 13px; }
+  .ql-editor { min-height: 80px; }
+  .has-subtasks-toggle { display: flex; align-items: center; gap: 6px; }
+  .has-subtasks-toggle input { width: auto; }
 </style>
 </head>
 <body>
@@ -124,6 +130,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
 
 <script>
 const firebaseConfig = {
@@ -153,6 +160,7 @@ let editMenuOpen = null;
 let dragState = null;
 let groupDragState = null;
 let personPriorityOrder = [];
+let pendingQuillInits = [];
 
 document.getElementById("login-btn").addEventListener("click", () => {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -239,6 +247,11 @@ function responsibleSummary(item) {
   }
   return item.responsible || "";
 }
+function formatDMY(isoDate) {
+  if (!isoDate) return "";
+  const [y, m, d] = isoDate.split("-");
+  return d + "-" + m + "-" + y;
+}
 function subtasksOfTask(taskId) {
   return Object.entries(subtasks).filter(([id, s]) => s.taskId === taskId).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
 }
@@ -302,10 +315,9 @@ function reorderProjectsAfterDrop(draggedId, targetId) {
 function addTask(projectId) {
   const name = prompt("Task name:");
   if (!name) return;
-  const hasSubtasks = confirm("Will this task be broken into subtasks?\n\nOK = yes, has subtasks\nCancel = no, this is a single checkable task");
   const list = tasksOfProject(projectId);
   const maxOrder = Math.max(0, ...list.map(([id, t]) => t.order || 0));
-  db.ref("state/tasks").push().set(Object.assign({ projectId, name, hasSubtasks, order: maxOrder + 1 }, defaultItemFields()));
+  db.ref("state/tasks").push().set(Object.assign({ projectId, name, hasSubtasks: false, order: maxOrder + 1 }, defaultItemFields()));
 }
 function collapseTask(taskId) {
   subtasksOfTask(taskId).forEach(([subId]) => expandedSubtasks.delete(subId));
@@ -314,7 +326,7 @@ function toggleItemDone(kind, id) {
   const item = kind === "task" ? tasks[id] : subtasks[id];
   if (!isCheckboxEnabled(kind, id, item)) return;
   const nowDone = !item.done;
-  db.ref("state/" + kind + "s/" + id).update({ done: nowDone, dateDone: nowDone && !item.dateDone ? new Date().toISOString().slice(0,10) : (item.dateDone || "") });
+  db.ref("state/" + kind + "s/" + id).update({ done: nowDone, dateDone: nowDone ? (item.dateDone || new Date().toISOString().slice(0,10)) : "" });
   if (kind === "subtask") {
     const task = tasks[item.taskId];
     if (task && task.done) {
@@ -401,9 +413,32 @@ function reorderSubtasksAfterDrop(taskId, draggedId, targetId) {
 
 // ---------- Render ----------
 function render() {
+  pendingQuillInits = [];
   renderProjects();
   renderPriorityPerson();
   renderPeopleDatalist();
+  pendingQuillInits.forEach(cfg => initQuillEditor(cfg));
+}
+
+function initQuillEditor(cfg) {
+  const el = document.getElementById(cfg.elId);
+  if (!el) return;
+  const item = cfg.kind === "task" ? tasks[cfg.id] : subtasks[cfg.id];
+  if (!item) return;
+  const quill = new Quill("#" + cfg.elId, {
+    theme: "snow",
+    modules: { toolbar: [["bold"], [{ list: "ordered" }, { list: "bullet" }], [{ color: [] }]] }
+  });
+  quill.root.innerHTML = item.notes || "";
+  quill.on("selection-change", (range) => {
+    if (range === null) {
+      const html = quill.root.innerHTML;
+      const currentItem = cfg.kind === "task" ? tasks[cfg.id] : subtasks[cfg.id];
+      if (currentItem && html !== (currentItem.notes || "")) {
+        db.ref("state/" + cfg.kind + "s/" + cfg.id + "/notes").set(html);
+      }
+    }
+  });
 }
 
 function renderPeopleDatalist() {
@@ -512,9 +547,9 @@ function renderTaskRow(taskId, task, projectId) {
   header.draggable = true;
   header.innerHTML = `
     <input type="checkbox" ${task.done ? "checked" : ""} ${enabled ? "" : "disabled"} data-role="check" />
-    <span class="name">${escapeHtml(task.name)}</span>
-    ${!task.hasSubtasks && respSummary ? `<span class="meta-inline">${escapeHtml(respSummary)}</span>` : ""}
-    ${!task.hasSubtasks ? badgeHtml(status) : ""}
+    <span class="name">${escapeHtml(task.name)}${task.done && task.dateDone ? ` <span class="done-date">(done on ${formatDMY(task.dateDone)})</span>` : ""}</span>
+    ${respSummary ? `<span class="meta-inline">${escapeHtml(respSummary)}</span>` : ""}
+    ${badgeHtml(status)}
   `;
   header.querySelector('[data-role="check"]').addEventListener("click", (e) => { e.stopPropagation(); toggleItemDone("task", taskId); });
 
@@ -553,16 +588,8 @@ function renderTaskRow(taskId, task, projectId) {
   if (subsOpen) {
     const body = document.createElement("div");
     body.className = "task-row-body";
+    body.appendChild(renderFieldsPanel("task", taskId, task));
     if (task.hasSubtasks) {
-      const urlWrap = document.createElement("div");
-      urlWrap.style.marginBottom = "10px";
-      urlWrap.innerHTML = `
-        <label style="display:block; color:#666; margin-bottom:3px; font-size:12px;">URL (folder link)</label>
-        <input type="text" value="${escapeAttr(task.url)}" placeholder="https://..." style="width:100%; font-size:13px; padding:6px 8px; border:1px solid #ccc; border-radius:4px;" data-field="url" />
-        ${task.url ? `<div style="margin-top:4px;"><a class="url-link" href="${escapeAttr(task.url)}" target="_blank" rel="noopener" style="font-size:12.5px;">Open link &#8599;</a></div>` : ""}
-      `;
-      urlWrap.querySelector('[data-field="url"]').addEventListener("change", (e) => updateItemField("task", taskId, "url", e.target.value));
-      body.appendChild(urlWrap);
       if (subs.length === 0) { const en = document.createElement("div"); en.className = "empty-note"; en.textContent = "No subtasks yet."; body.appendChild(en); }
       subs.forEach(([subId, sub]) => body.appendChild(renderSubtaskRow(subId, sub, taskId)));
       const addSubBtn = document.createElement("button");
@@ -570,8 +597,6 @@ function renderTaskRow(taskId, task, projectId) {
       addSubBtn.textContent = "+ Add subtask";
       addSubBtn.addEventListener("click", () => addSubtask(taskId));
       body.appendChild(addSubBtn);
-    } else {
-      body.appendChild(renderFieldsPanel("task", taskId, task));
     }
     row.appendChild(body);
   }
@@ -593,7 +618,7 @@ function renderSubtaskRow(subId, sub, taskId) {
   header.draggable = true;
   header.innerHTML = `
     <input type="checkbox" ${sub.done ? "checked" : ""} ${enabled ? "" : "disabled"} data-role="check" />
-    <span class="name">${escapeHtml(sub.name)}</span>
+    <span class="name">${escapeHtml(sub.name)}${sub.done && sub.dateDone ? ` <span class="done-date">(done on ${formatDMY(sub.dateDone)})</span>` : ""}</span>
     ${respSummary ? `<span class="meta-inline">${escapeHtml(respSummary)}</span>` : ""}
     ${badgeHtml(status)}
   `;
@@ -665,7 +690,13 @@ function renderFieldsPanel(kind, id, item) {
         <button class="btn btn-secondary btn-small" data-action="add-person">+ Add person</button>
       </div>`;
   }
+  const quillElId = "quill-" + kind + "-" + id;
   fields.innerHTML = `
+    ${kind === "task" ? `
+      <div class="full has-subtasks-toggle">
+        <input type="checkbox" id="hastasks-${id}" ${item.hasSubtasks ? "checked" : ""} />
+        <label for="hastasks-${id}" style="margin:0;">This task has subtasks</label>
+      </div>` : ""}
     ${responsibleHtml}
     <div class="full">
       <label>URL</label>
@@ -673,9 +704,10 @@ function renderFieldsPanel(kind, id, item) {
       ${item.url ? `<div style="margin-top:4px;"><a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a></div>` : ""}
     </div>
     <div><label>Deadline</label><input type="date" data-field="deadline" value="${escapeAttr(item.deadline)}" /></div>
-    <div><label>Date done</label><input type="date" data-field="dateDone" value="${escapeAttr(item.dateDone)}" /></div>
-    <div class="full"><label>Notes</label><textarea data-field="notes" rows="3">${escapeHtml(item.notes || "")}</textarea></div>
+    <div class="full"><label>Notes</label><div id="${quillElId}"></div></div>
   `;
+  const hasTasksCheckbox = fields.querySelector("#hastasks-" + id);
+  if (hasTasksCheckbox) hasTasksCheckbox.addEventListener("change", (e) => updateItemField("task", id, "hasSubtasks", e.target.checked));
   fields.querySelectorAll('[data-field]').forEach(input => {
     input.addEventListener("change", (e) => {
       const field = e.target.dataset.field;
@@ -692,6 +724,7 @@ function renderFieldsPanel(kind, id, item) {
     if (action === "name") el.addEventListener("change", (e) => updateResponsiblePerson(kind, id, idx, "name", e.target.value));
     if (action === "remove") el.addEventListener("click", () => removeResponsiblePerson(kind, id, idx));
   });
+  pendingQuillInits.push({ elId: quillElId, kind, id });
   return fields;
 }
 
@@ -712,7 +745,7 @@ function renderPriorityDetail(kind, id, item, taskId, task) {
   detail.innerHTML = `
     <div><span class="label">Deadline: </span>${escapeHtml(item.deadline || "—")}</div>
     <div><span class="label">URL: </span>${item.url ? `<a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a>` : "—"}</div>
-    <div><span class="label">Notes: </span>${escapeHtml(item.notes || "—")}</div>
+    <div><span class="label">Notes: </span>${item.notes ? `<div style="display:inline-block; vertical-align:top;">${item.notes}</div>` : "—"}</div>
     <button class="btn btn-secondary btn-small" data-action="goto">Go to project &#8594;</button>
   `;
   detail.querySelector('[data-action="goto"]').addEventListener("click", () => goToItem(kind, id, taskId, task));
