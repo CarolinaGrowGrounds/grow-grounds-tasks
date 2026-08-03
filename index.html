@@ -65,6 +65,7 @@
   .badge { font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
   .badge-overdue { background: #d9c2a3; color: #5c3d1a; }
   .badge-urgent { background: #f3b3b3; color: #7a1f1f; }
+  .badge-waiting { background: #c98a4b; color: #ffffff; }
   .badge-important { background: #f7e79b; color: #6b5b00; }
   .badge-keep { background: #f0f0ec; color: #888; }
   .badge-done { background: #c8e6c9; color: #1b5e20; }
@@ -89,7 +90,9 @@
   a.url-link { color: #2f6b3a; text-decoration: underline; }
   .done-date { font-size: 12px; color: #1b5e20; font-weight: 500; }
   .ql-container { background: white; font-size: 13px; }
-  .ql-editor { min-height: 80px; }
+  .ql-editor { min-height: 60px; max-height: 220px; overflow-y: auto; }
+  .notes-wrap { display: block; width: 100%; overflow: hidden; border-radius: 4px; }
+  .ql-toolbar.ql-snow, .ql-container.ql-snow { width: 100%; box-sizing: border-box; }
   .has-subtasks-toggle { display: flex; align-items: center; gap: 6px; }
   .has-subtasks-toggle input { width: auto; }
 </style>
@@ -207,8 +210,11 @@ function ensureGeneralProject() {
   }
 }
 
-function defaultItemFields() {
-  return { responsibleMode: "single", responsible: "", responsibles: [], deadline: "", url: "", dateDone: "", notes: "", done: false };
+function defaultTaskFields() {
+  return { responsibleMode: "single", responsible: "", responsibles: [], url: "", deadline: "", waiting: false, dateDone: "", notes: "", done: false, hasSubtasks: false };
+}
+function defaultSubtaskFields() {
+  return { deadline: "", waiting: false, dateDone: "", notes: "", done: false };
 }
 function itemResponsibleMode(item) { return item.responsibleMode || "single"; }
 function itemResponsibles(item) { return item.responsibles || []; }
@@ -223,11 +229,12 @@ function isCheckboxEnabled(kind, id, item) {
     const subs = subtasksOfTask(id);
     if (subs.length > 0) enabled = subs.every(([sid, s]) => s.done);
   }
-  if (!item.hasSubtasks && itemResponsibleMode(item) === "multiple") enabled = enabled && allResponsiblesDone(item);
+  if (itemResponsibleMode(item) === "multiple") enabled = enabled && allResponsiblesDone(item);
   return enabled;
 }
 function deadlineStatus(item) {
   if (item.done) return "done";
+  if (item.waiting) return "waiting";
   if (!item.deadline) return "keep";
   const today = new Date(); today.setHours(0,0,0,0);
   const deadline = new Date(item.deadline + "T00:00:00");
@@ -237,7 +244,8 @@ function deadlineStatus(item) {
   if (diffDays <= 30) return "important";
   return "keep";
 }
-const STATUS_LABEL = { overdue: "Overdue", urgent: "Urgent", important: "Important", keep: "Keep in mind", done: "Done" };
+const STATUS_LABEL = { overdue: "Overdue", urgent: "Urgent", waiting: "Waiting", important: "Important", keep: "Keep in mind", done: "Done" };
+const STATUS_RANK = { overdue: 0, urgent: 1, waiting: 2, important: 3, keep: 4, done: 5 };
 function badgeHtml(status) { return `<span class="badge badge-${status}">${STATUS_LABEL[status]}</span>`; }
 function responsibleSummary(item) {
   if (itemResponsibleMode(item) === "multiple") {
@@ -251,6 +259,16 @@ function formatDMY(isoDate) {
   if (!isoDate) return "";
   const [y, m, d] = isoDate.split("-");
   return d + "-" + m + "-" + y;
+}
+function computeEffectiveTaskStatus(taskId, task) {
+  if (!task.hasSubtasks) return deadlineStatus(task);
+  const subs = subtasksOfTask(taskId).map(([id, s]) => s);
+  const open = subs.filter(s => !s.done);
+  if (subs.length === 0) return "keep";
+  if (open.length === 0) return "done";
+  let worst = "keep";
+  open.forEach(s => { if (STATUS_RANK[deadlineStatus(s)] < STATUS_RANK[worst]) worst = deadlineStatus(s); });
+  return worst;
 }
 function subtasksOfTask(taskId) {
   return Object.entries(subtasks).filter(([id, s]) => s.taskId === taskId).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
@@ -317,7 +335,7 @@ function addTask(projectId) {
   if (!name) return;
   const list = tasksOfProject(projectId);
   const maxOrder = Math.max(0, ...list.map(([id, t]) => t.order || 0));
-  db.ref("state/tasks").push().set(Object.assign({ projectId, name, hasSubtasks: false, order: maxOrder + 1 }, defaultItemFields()));
+  db.ref("state/tasks").push().set(Object.assign({ projectId, name, order: maxOrder + 1 }, defaultTaskFields()));
 }
 function collapseTask(taskId) {
   subtasksOfTask(taskId).forEach(([subId]) => expandedSubtasks.delete(subId));
@@ -373,7 +391,7 @@ function addSubtask(taskId) {
   if (!name) return;
   const list = subtasksOfTask(taskId);
   const maxOrder = Math.max(0, ...list.map(([id, s]) => s.order || 0));
-  db.ref("state/subtasks").push().set(Object.assign({ taskId, name, order: maxOrder + 1, priorityOrder: Date.now() }, defaultItemFields()));
+  db.ref("state/subtasks").push().set(Object.assign({ taskId, name, order: maxOrder + 1, priorityOrder: Date.now() }, defaultSubtaskFields()));
   const task = tasks[taskId];
   if (task && task.done) db.ref("state/tasks/" + taskId + "/done").set(false);
 }
@@ -537,7 +555,7 @@ function renderTaskRow(taskId, task, projectId) {
   row.id = "task-" + taskId;
   const subs = subtasksOfTask(taskId);
   const subsOpen = expandedTasks.has(taskId);
-  const status = deadlineStatus(task);
+  const status = computeEffectiveTaskStatus(taskId, task);
   const enabled = isCheckboxEnabled("task", taskId, task);
   const respSummary = responsibleSummary(task);
   const menuOpen = editMenuOpen && editMenuOpen.kind === "task" && editMenuOpen.id === taskId;
@@ -588,7 +606,7 @@ function renderTaskRow(taskId, task, projectId) {
   if (subsOpen) {
     const body = document.createElement("div");
     body.className = "task-row-body";
-    body.appendChild(renderFieldsPanel("task", taskId, task));
+    body.appendChild(renderTaskFieldsPanel(taskId, task));
     if (task.hasSubtasks) {
       if (subs.length === 0) { const en = document.createElement("div"); en.className = "empty-note"; en.textContent = "No subtasks yet."; body.appendChild(en); }
       subs.forEach(([subId, sub]) => body.appendChild(renderSubtaskRow(subId, sub, taskId)));
@@ -610,7 +628,6 @@ function renderSubtaskRow(subId, sub, taskId) {
   const isExpanded = expandedSubtasks.has(subId);
   const status = deadlineStatus(sub);
   const enabled = isCheckboxEnabled("subtask", subId, sub);
-  const respSummary = responsibleSummary(sub);
   const menuOpen = editMenuOpen && editMenuOpen.kind === "subtask" && editMenuOpen.id === subId;
 
   const header = document.createElement("div");
@@ -619,7 +636,6 @@ function renderSubtaskRow(subId, sub, taskId) {
   header.innerHTML = `
     <input type="checkbox" ${sub.done ? "checked" : ""} ${enabled ? "" : "disabled"} data-role="check" />
     <span class="name">${escapeHtml(sub.name)}${sub.done && sub.dateDone ? ` <span class="done-date">(done on ${formatDMY(sub.dateDone)})</span>` : ""}</span>
-    ${respSummary ? `<span class="meta-inline">${escapeHtml(respSummary)}</span>` : ""}
     ${badgeHtml(status)}
   `;
   header.querySelector('[data-role="check"]').addEventListener("click", (e) => { e.stopPropagation(); toggleItemDone("subtask", subId); });
@@ -654,14 +670,14 @@ function renderSubtaskRow(subId, sub, taskId) {
     dragState = null;
   });
   row.appendChild(header);
-  if (isExpanded) row.appendChild(renderFieldsPanel("subtask", subId, sub));
+  if (isExpanded) row.appendChild(renderSubtaskFieldsPanel(subId, sub));
   return row;
 }
 
-function renderFieldsPanel(kind, id, item) {
+function renderTaskFieldsPanel(taskId, task) {
   const fields = document.createElement("div");
   fields.className = "fields-panel";
-  const mode = itemResponsibleMode(item);
+  const mode = itemResponsibleMode(task);
   let responsibleHtml = "";
   if (mode === "single") {
     responsibleHtml = `
@@ -669,11 +685,11 @@ function renderFieldsPanel(kind, id, item) {
         <label>Responsible</label>
         <div class="mode-name-row">
           <select data-field="responsibleMode"><option value="single" selected>Single</option><option value="multiple">Multiple</option></select>
-          <input type="text" data-field="responsible" value="${escapeAttr(item.responsible)}" placeholder="Name" list="people-list" />
+          <input type="text" data-field="responsible" value="${escapeAttr(task.responsible)}" placeholder="Name" list="people-list" />
         </div>
       </div>`;
   } else {
-    const rows = itemResponsibles(item).map((r, idx) => `
+    const rows = itemResponsibles(task).map((r, idx) => `
       <div class="responsible-row">
         <input type="checkbox" ${r.done ? "checked" : ""} data-resp-idx="${idx}" data-resp-action="check" />
         <input type="text" value="${escapeAttr(r.name)}" data-resp-idx="${idx}" data-resp-action="name" placeholder="Name" list="people-list" />
@@ -690,41 +706,75 @@ function renderFieldsPanel(kind, id, item) {
         <button class="btn btn-secondary btn-small" data-action="add-person">+ Add person</button>
       </div>`;
   }
-  const quillElId = "quill-" + kind + "-" + id;
+  const quillElId = "quill-task-" + taskId;
   fields.innerHTML = `
-    ${kind === "task" ? `
-      <div class="full has-subtasks-toggle">
-        <input type="checkbox" id="hastasks-${id}" ${item.hasSubtasks ? "checked" : ""} />
-        <label for="hastasks-${id}" style="margin:0;">This task has subtasks</label>
-      </div>` : ""}
+    <div class="full has-subtasks-toggle">
+      <input type="checkbox" id="hastasks-${taskId}" ${task.hasSubtasks ? "checked" : ""} />
+      <label for="hastasks-${taskId}" style="margin:0;">This task has subtasks</label>
+    </div>
     ${responsibleHtml}
     <div class="full">
       <label>URL</label>
-      <input type="text" data-field="url" value="${escapeAttr(item.url)}" placeholder="https://..." />
-      ${item.url ? `<div style="margin-top:4px;"><a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a></div>` : ""}
+      <input type="text" data-field="url" value="${escapeAttr(task.url)}" placeholder="https://..." />
+      ${task.url ? `<div style="margin-top:4px;"><a class="url-link" href="${escapeAttr(task.url)}" target="_blank" rel="noopener">Open link &#8599;</a></div>` : ""}
     </div>
-    <div><label>Deadline</label><input type="date" data-field="deadline" value="${escapeAttr(item.deadline)}" /></div>
-    <div class="full"><label>Notes</label><div id="${quillElId}"></div></div>
+    ${!task.hasSubtasks ? `
+      <div>
+        <label>Deadline</label>
+        <input type="date" data-field="deadline" value="${escapeAttr(task.deadline)}" />
+      </div>
+      <div class="has-subtasks-toggle" style="align-self:end;">
+        <input type="checkbox" id="waiting-task-${taskId}" ${task.waiting ? "checked" : ""} />
+        <label for="waiting-task-${taskId}" style="margin:0;">Waiting</label>
+      </div>
+      <div class="full"><label>Notes</label><div class="notes-wrap"><div id="${quillElId}"></div></div></div>
+    ` : ""}
   `;
-  const hasTasksCheckbox = fields.querySelector("#hastasks-" + id);
-  if (hasTasksCheckbox) hasTasksCheckbox.addEventListener("change", (e) => updateItemField("task", id, "hasSubtasks", e.target.checked));
+  const hasTasksCheckbox = fields.querySelector("#hastasks-" + taskId);
+  if (hasTasksCheckbox) hasTasksCheckbox.addEventListener("change", (e) => {
+    if (e.target.checked && task.notes && task.notes.trim() !== "") {
+      const ok = confirm("This task's notes won't be shown anymore once subtasks are enabled. Copy anything important into a subtask's notes first. Continue?");
+      if (!ok) { e.target.checked = false; return; }
+    }
+    updateItemField("task", taskId, "hasSubtasks", e.target.checked);
+  });
+  const waitingCheckbox = fields.querySelector("#waiting-task-" + taskId);
+  if (waitingCheckbox) waitingCheckbox.addEventListener("change", (e) => updateItemField("task", taskId, "waiting", e.target.checked));
   fields.querySelectorAll('[data-field]').forEach(input => {
     input.addEventListener("change", (e) => {
       const field = e.target.dataset.field;
-      if (field === "responsibleMode") setResponsibleMode(kind, id, e.target.value);
-      else updateItemField(kind, id, field, e.target.value);
+      if (field === "responsibleMode") setResponsibleMode("task", taskId, e.target.value);
+      else updateItemField("task", taskId, field, e.target.value);
     });
   });
   const addPersonBtn = fields.querySelector('[data-action="add-person"]');
-  if (addPersonBtn) addPersonBtn.addEventListener("click", () => addResponsiblePerson(kind, id));
+  if (addPersonBtn) addPersonBtn.addEventListener("click", () => addResponsiblePerson("task", taskId));
   fields.querySelectorAll('[data-resp-action]').forEach(el => {
     const idx = parseInt(el.dataset.respIdx, 10);
     const action = el.dataset.respAction;
-    if (action === "check") el.addEventListener("change", (e) => updateResponsiblePerson(kind, id, idx, "done", e.target.checked));
-    if (action === "name") el.addEventListener("change", (e) => updateResponsiblePerson(kind, id, idx, "name", e.target.value));
-    if (action === "remove") el.addEventListener("click", () => removeResponsiblePerson(kind, id, idx));
+    if (action === "check") el.addEventListener("change", (e) => updateResponsiblePerson("task", taskId, idx, "done", e.target.checked));
+    if (action === "name") el.addEventListener("change", (e) => updateResponsiblePerson("task", taskId, idx, "name", e.target.value));
+    if (action === "remove") el.addEventListener("click", () => removeResponsiblePerson("task", taskId, idx));
   });
-  pendingQuillInits.push({ elId: quillElId, kind, id });
+  if (!task.hasSubtasks) pendingQuillInits.push({ elId: quillElId, kind: "task", id: taskId });
+  return fields;
+}
+
+function renderSubtaskFieldsPanel(subId, sub) {
+  const fields = document.createElement("div");
+  fields.className = "fields-panel";
+  const quillElId = "quill-subtask-" + subId;
+  fields.innerHTML = `
+    <div><label>Deadline</label><input type="date" data-field="deadline" value="${escapeAttr(sub.deadline)}" /></div>
+    <div class="has-subtasks-toggle" style="align-self:end;">
+      <input type="checkbox" id="waiting-subtask-${subId}" ${sub.waiting ? "checked" : ""} />
+      <label for="waiting-subtask-${subId}" style="margin:0;">Waiting</label>
+    </div>
+    <div class="full"><label>Notes</label><div class="notes-wrap"><div id="${quillElId}"></div></div></div>
+  `;
+  fields.querySelector('[data-field="deadline"]').addEventListener("change", (e) => updateItemField("subtask", subId, "deadline", e.target.value));
+  fields.querySelector("#waiting-subtask-" + subId).addEventListener("change", (e) => updateItemField("subtask", subId, "waiting", e.target.checked));
+  pendingQuillInits.push({ elId: quillElId, kind: "subtask", id: subId });
   return fields;
 }
 
@@ -732,6 +782,7 @@ function goToItem(kind, id, taskId, task) {
   const projectId = task ? task.projectId : null;
   if (projectId) expandedProjects.add(projectId);
   if (kind === "subtask") { expandedTasks.add(taskId); expandedSubtasks.add(id); }
+  else { expandedTasks.add(id); }
   render();
   setTimeout(() => {
     const el = document.getElementById((kind === "task" ? "task-" : "subtask-") + id);
@@ -742,12 +793,24 @@ function goToItem(kind, id, taskId, task) {
 function renderPriorityDetail(kind, id, item, taskId, task) {
   const detail = document.createElement("div");
   detail.className = "priority-item-detail";
-  detail.innerHTML = `
-    <div><span class="label">Deadline: </span>${escapeHtml(item.deadline || "—")}</div>
-    <div><span class="label">URL: </span>${item.url ? `<a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a>` : "—"}</div>
-    <div><span class="label">Notes: </span>${item.notes ? `<div style="display:inline-block; vertical-align:top;">${item.notes}</div>` : "—"}</div>
-    <button class="btn btn-secondary btn-small" data-action="goto">Go to project &#8594;</button>
-  `;
+  if (item.hasSubtasks) {
+    const subs = subtasksOfTask(id);
+    const openSubs = subs.filter(([sid, s]) => !s.done);
+    const subsHtml = openSubs.length === 0 ? "<div style='color:#999;'>No open subtasks.</div>" : openSubs.map(([sid, s]) => `<div>• ${escapeHtml(s.name)}${s.deadline ? " — " + escapeHtml(s.deadline) : ""} ${badgeHtml(deadlineStatus(s))}</div>`).join("");
+    detail.innerHTML = `
+      <div><span class="label">URL: </span>${item.url ? `<a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a>` : "—"}</div>
+      <div style="margin-top:6px;"><span class="label">Open subtasks:</span></div>
+      ${subsHtml}
+      <button class="btn btn-secondary btn-small" data-action="goto" style="margin-top:6px;">Go to project &#8594;</button>
+    `;
+  } else {
+    detail.innerHTML = `
+      <div><span class="label">Deadline: </span>${escapeHtml(item.deadline || "—")}</div>
+      <div><span class="label">URL: </span>${item.url ? `<a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a>` : "—"}</div>
+      <div><span class="label">Notes: </span>${item.notes ? `<div style="display:inline-block; vertical-align:top;">${item.notes}</div>` : "—"}</div>
+      <button class="btn btn-secondary btn-small" data-action="goto">Go to project &#8594;</button>
+    `;
+  }
   detail.querySelector('[data-action="goto"]').addEventListener("click", () => goToItem(kind, id, taskId, task));
   return detail;
 }
@@ -761,14 +824,9 @@ function renderPriorityPerson() {
     grouped[personName].push({ kind, id, item, taskId });
   }
   Object.entries(tasks).forEach(([id, t]) => {
-    if (t.done || t.hasSubtasks) return;
+    if (t.done) return;
     if (itemResponsibleMode(t) === "multiple") itemResponsibles(t).forEach(r => { if (r.name && !r.done) addEntry(r.name, "task", id, t, null); });
     else if (t.responsible) addEntry(t.responsible, "task", id, t, null);
-  });
-  Object.entries(subtasks).forEach(([id, s]) => {
-    if (s.done) return;
-    if (itemResponsibleMode(s) === "multiple") itemResponsibles(s).forEach(r => { if (r.name && !r.done) addEntry(r.name, "subtask", id, s, s.taskId); });
-    else if (s.responsible) addEntry(s.responsible, "subtask", id, s, s.taskId);
   });
   const people = Object.keys(grouped).sort((a, b) => {
     const ia = personPriorityOrder.indexOf(a), ib = personPriorityOrder.indexOf(b);
@@ -826,9 +884,9 @@ function renderPriorityGroup(person, list, currentOrder) {
 
 function renderPriorityItem(entry, list, groupKey) {
   const { kind, id, item, taskId } = entry;
-  const task = kind === "subtask" ? tasks[taskId] : item;
+  const task = item;
   const project = task ? projects[task.projectId] : null;
-  const status = deadlineStatus(item);
+  const status = computeEffectiveTaskStatus(id, task);
   const key = groupKey + "-" + kind + "-" + id;
   const isExpanded = expandedPriorityItems.has(key);
 
