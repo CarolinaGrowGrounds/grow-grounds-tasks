@@ -101,7 +101,7 @@
 
 <div id="login-screen">
   <h1>Grow Grounds — Task Coordination</h1>
-  <button id="login-btn">Sign in with Google</button>
+  <button id="login-btn">Sign in with Microsoft</button>
   <div id="error-banner"></div>
 </div>
 
@@ -166,7 +166,8 @@ let personPriorityOrder = [];
 let pendingQuillInits = [];
 
 document.getElementById("login-btn").addEventListener("click", () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
+  const provider = new firebase.auth.OAuthProvider("microsoft.com");
+  provider.setCustomParameters({ tenant: ALLOWED_DOMAIN });
   auth.signInWithPopup(provider).catch(err => {
     document.getElementById("error-banner").textContent = "Sign-in failed: " + err.message;
   });
