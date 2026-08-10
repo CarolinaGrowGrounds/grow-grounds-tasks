@@ -147,6 +147,9 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
+auth.getRedirectResult().catch(err => {
+  document.getElementById("error-banner").textContent = "Sign-in failed: " + err.message;
+});
 const db = firebase.database();
 const ALLOWED_DOMAIN = "growgrounds.org";
 
@@ -168,9 +171,7 @@ let pendingQuillInits = [];
 document.getElementById("login-btn").addEventListener("click", () => {
   const provider = new firebase.auth.OAuthProvider("microsoft.com");
   provider.setCustomParameters({ tenant: ALLOWED_DOMAIN });
-  auth.signInWithPopup(provider).catch(err => {
-    document.getElementById("error-banner").textContent = "Sign-in failed: " + err.message;
-  });
+  auth.signInWithRedirect(provider);
 });
 document.getElementById("signout-btn").addEventListener("click", () => auth.signOut());
 
