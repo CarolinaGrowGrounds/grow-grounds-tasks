@@ -30,23 +30,39 @@
 
   .drag-handle { cursor: grab; color: #aaa; font-size: 14px; padding: 0 4px; }
 
-  .project-box { border: 1px solid #ccc; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+  .project-box { border: 1px solid #1f4d2b; border-radius: 8px; margin-bottom: 10px; overflow: hidden; background: #f3f6f3; }
   .project-box.dragging { opacity: 0.4; }
-  .project-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; background: #fafaf7; }
-  .project-header:hover { background: #f0f0ea; }
-  .project-header .name { flex: 1; font-size: 16px; font-weight: 600; }
-  .project-body { padding: 10px 14px 14px; border-top: 1px solid #eee; }
+  .project-header { display: flex; align-items: center; gap: 8px; padding: 12px 14px; cursor: pointer; background: #1f4d2b; color: #ffffff; }
+  .project-header:hover { background: #265c34; }
+  .project-header .name { flex: 1; font-size: 17px; font-weight: 600; }
+  .project-header .btn-icon { color: #d3e8d7; }
+  .project-header .btn-icon:hover { color: #ffffff; }
+  .project-header .drag-handle { color: #a9cbb0; }
+  .project-header .btn-text { color: #ffffff; }
+  .project-header .btn-text.danger { color: #ffc4c4; }
+  .project-body { padding: 10px 14px 14px; }
 
-  .task-row { border: 1px solid #e5e5e0; border-radius: 6px; margin-bottom: 8px; background: #fdfdfb; }
+  .task-row { border: 1px solid #8fbf98; border-radius: 6px; margin-bottom: 8px; background: #cfe5d2; }
   .task-row.dragging { opacity: 0.4; }
-  .task-row-header { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; }
-  .task-row-header .name { flex: 1; font-size: 14.5px; font-weight: 500; }
-  .task-row-body { border-top: 1px solid #eee; padding: 10px 12px 12px 20px; }
+  .task-row-header { display: flex; align-items: center; gap: 8px; padding: 9px 12px; cursor: pointer; color: #14391f; border-radius: 6px; }
+  .task-row-header:hover { background: #c3ddc7; }
+  .task-row-header .name { flex: 1; font-size: 15px; font-weight: 500; }
+  .task-row-header .meta-inline { color: #3d5f45; }
+  .task-row-header .btn-icon { color: #3d5f45; }
+  .task-row-header .btn-icon:hover { color: #14391f; }
+  .task-row-header .drag-handle { color: #5f8a69; }
+  .task-row-header .btn-text { color: #14391f; }
+  .task-row-header .btn-text.danger { color: #a33; }
+  .task-row-body { border-top: 1px solid #8fbf98; padding: 10px 12px 12px 20px; }
+  .task-row-body > .fields-panel { border-top: none; padding: 0 0 10px; }
+  .task-row-body > .fields-panel label { color: #35563c; }
+  .task-row-body .empty-note { color: #4f7358; }
+  .task-row > .inline-form { margin: 0 12px 10px; }
 
-  .subtask-row { border: 1px solid #eee; border-radius: 5px; margin-bottom: 6px; background: white; }
+  .subtask-row { border: 1px solid #b9c9bc; border-radius: 5px; margin-bottom: 6px; background: #ffffff; }
   .subtask-row.dragging { opacity: 0.4; }
-  .subtask-row-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; }
-  .subtask-row-header .name { flex: 1; font-size: 14px; }
+  .subtask-row-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; color: #1d1d1d; }
+  .subtask-row-header .name { flex: 1; font-size: 13.5px; }
   .meta-inline { font-size: 12px; color: #888; white-space: nowrap; }
 
   .fields-panel { border-top: 1px solid #eee; padding: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; }
@@ -61,14 +77,16 @@
   .mode-name-row { display: flex; gap: 8px; align-items: center; }
   .mode-name-row select { width: 110px; flex: none; }
   .mode-name-row input[type="text"] { flex: 1; }
+  .readonly-line { background: #f3f6f3; border: 1px solid #c9d6cb; border-radius: 4px; padding: 6px 8px; font-size: 13px; color: #333; }
+  .hint { font-size: 12px; color: #5a7a62; }
 
   .badge { font-size: 11.5px; font-weight: 600; padding: 3px 8px; border-radius: 5px; white-space: nowrap; }
   .badge-overdue { background: #d9c2a3; color: #5c3d1a; }
   .badge-urgent { background: #f3b3b3; color: #7a1f1f; }
   .badge-waiting { background: #c98a4b; color: #ffffff; }
   .badge-important { background: #f7e79b; color: #6b5b00; }
-  .badge-keep { background: #f0f0ec; color: #888; }
-  .badge-done { background: #c8e6c9; color: #1b5e20; }
+  .badge-keep { background: #f0f0ec; color: #777; }
+  .badge-done { background: #2f6b3a; color: #ffffff; }
 
   .add-btn { margin-top: 6px; }
 
@@ -82,6 +100,7 @@
   .priority-item-header { display: flex; align-items: center; gap: 8px; padding: 8px 10px; cursor: pointer; font-size: 13.5px; }
   .priority-item-header .name { flex: 1; }
   .priority-item-header .tag { font-size: 11.5px; color: #888; white-space: nowrap; }
+  .priority-item-header .tag-ready { font-size: 11.5px; color: #1b4d24; background: #d8ecd9; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
   .priority-item-detail { border-top: 1px solid #eee; padding: 10px; font-size: 13px; color: #444; }
   .priority-item-detail div { margin-bottom: 4px; }
   .priority-item-detail .label { color: #888; font-size: 11.5px; }
@@ -95,6 +114,20 @@
   .ql-toolbar.ql-snow, .ql-container.ql-snow { width: 100%; box-sizing: border-box; }
   .has-subtasks-toggle { display: flex; align-items: center; gap: 6px; }
   .has-subtasks-toggle input { width: auto; }
+
+  .inline-form { border: 1px dashed #5f8a69; border-radius: 8px; padding: 10px 12px; background: #ffffff; margin: 6px 0; font-size: 13px; color: #222; }
+  .inline-form label { display: block; color: #555; font-size: 12px; margin-bottom: 3px; }
+  .inline-form input[type="text"] { width: 100%; font-size: 13px; padding: 6px 8px; border: 1px solid #ccc; border-radius: 4px; font-family: inherit; margin-bottom: 8px; }
+  .inline-form .check-row { display: flex; align-items: center; gap: 6px; margin: 4px 0 8px; font-size: 13px; color: #222; }
+  .inline-form .check-row input { width: auto; margin: 0; }
+  .inline-form .targets { border: 1px solid #e0e6e1; border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; max-height: 190px; overflow-y: auto; }
+  .inline-form .target-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 13px; color: #222; margin: 0; }
+  .inline-form .target-row input { width: auto; margin: 0; }
+  .inline-form .dup-note { color: #a33; font-size: 11.5px; }
+  .inline-form .form-actions { display: flex; gap: 8px; }
+  .inline-form .form-error { color: #a33; font-size: 12px; margin: 0 0 6px; }
+  .inline-form .form-error:empty { display: none; }
+  .inline-form .form-hint { color: #777; font-size: 12px; margin: 0 0 8px; }
 </style>
 </head>
 <body>
@@ -164,6 +197,7 @@ let dragState = null;
 let groupDragState = null;
 let personPriorityOrder = [];
 let pendingQuillInits = [];
+let addForm = null;
 
 document.getElementById("login-btn").addEventListener("click", () => {
   const provider = new firebase.auth.OAuthProvider("microsoft.com");
@@ -211,11 +245,12 @@ function ensureGeneralProject() {
   }
 }
 
+// ---------- Field defaults and helpers ----------
 function defaultTaskFields() {
-  return { responsibleMode: "single", responsible: "", responsibles: [], url: "", deadline: "", waiting: false, dateDone: "", notes: "", done: false, hasSubtasks: false };
+  return { responsibleMode: "single", responsible: "", responsibles: [], url: "", deadline: "", ownDeadlineOn: false, waiting: false, dateDone: "", notes: "", done: false, hasSubtasks: false };
 }
 function defaultSubtaskFields() {
-  return { deadline: "", waiting: false, dateDone: "", notes: "", done: false };
+  return { responsible: "", deadline: "", waiting: false, dateDone: "", notes: "", done: false };
 }
 function itemResponsibleMode(item) { return item.responsibleMode || "single"; }
 function itemResponsibles(item) { return item.responsibles || []; }
@@ -223,6 +258,10 @@ function allResponsiblesDone(item) {
   const list = itemResponsibles(item);
   if (list.length === 0) return true;
   return list.every(r => r.done);
+}
+function byOrder(a, b) { return (a[1].order || 0) - (b[1].order || 0); }
+function hasRealNotes(html) {
+  return !!html && html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim() !== "";
 }
 function isCheckboxEnabled(kind, id, item) {
   let enabled = true;
@@ -248,6 +287,7 @@ function deadlineStatus(item) {
 const STATUS_LABEL = { overdue: "Overdue", urgent: "Urgent", waiting: "Waiting", important: "Important", keep: "Keep in mind", done: "Done" };
 const STATUS_RANK = { overdue: 0, urgent: 1, waiting: 2, important: 3, keep: 4, done: 5 };
 function badgeHtml(status) { return `<span class="badge badge-${status}">${STATUS_LABEL[status]}</span>`; }
+function worseStatus(a, b) { return STATUS_RANK[b] < STATUS_RANK[a] ? b : a; }
 function responsibleSummary(item) {
   if (itemResponsibleMode(item) === "multiple") {
     const list = itemResponsibles(item);
@@ -261,21 +301,38 @@ function formatDMY(isoDate) {
   const [y, m, d] = isoDate.split("-");
   return d + "-" + m + "-" + y;
 }
+function subtasksOfTask(taskId) {
+  return Object.entries(subtasks).filter(([id, s]) => s.taskId === taskId).sort(byOrder);
+}
+function tasksOfProject(projectId) {
+  return Object.entries(tasks).filter(([id, t]) => t.projectId === projectId).sort(byOrder);
+}
+function nextSubtaskDeadline(taskId) {
+  let best = null;
+  subtasksOfTask(taskId).forEach(([id, s]) => {
+    if (!s.done && s.deadline && (!best || s.deadline < best.date)) best = { date: s.deadline, name: s.name };
+  });
+  return best;
+}
+function nextDeadlineText(taskId) {
+  const subs = subtasksOfTask(taskId);
+  if (subs.length === 0) return "No subtasks yet";
+  if (subs.every(([sid, s]) => s.done)) return "All subtasks done";
+  const next = nextSubtaskDeadline(taskId);
+  if (next) return formatDMY(next.date) + " \u00b7 " + next.name;
+  return "No subtask deadlines set yet";
+}
 function computeEffectiveTaskStatus(taskId, task) {
+  if (task.done) return "done";
   if (!task.hasSubtasks) return deadlineStatus(task);
   const subs = subtasksOfTask(taskId).map(([id, s]) => s);
   const open = subs.filter(s => !s.done);
-  if (subs.length === 0) return "keep";
-  if (open.length === 0) return "done";
+  const hasOwn = !!(task.ownDeadlineOn && task.deadline);
+  if (subs.length > 0 && open.length === 0 && !hasOwn) return "done";
   let worst = "keep";
-  open.forEach(s => { if (STATUS_RANK[deadlineStatus(s)] < STATUS_RANK[worst]) worst = deadlineStatus(s); });
+  if (hasOwn) worst = worseStatus(worst, deadlineStatus({ done: false, waiting: false, deadline: task.deadline }));
+  open.forEach(s => { worst = worseStatus(worst, deadlineStatus(s)); });
   return worst;
-}
-function subtasksOfTask(taskId) {
-  return Object.entries(subtasks).filter(([id, s]) => s.taskId === taskId).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
-}
-function tasksOfProject(projectId) {
-  return Object.entries(tasks).filter(([id, t]) => t.projectId === projectId).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
 }
 function collectAllNames() {
   const names = new Set();
@@ -283,11 +340,16 @@ function collectAllNames() {
     if (itemResponsibleMode(t) === "multiple") itemResponsibles(t).forEach(r => r.name && names.add(r.name));
     else if (t.responsible) names.add(t.responsible);
   });
-  Object.values(subtasks).forEach(s => {
-    if (itemResponsibleMode(s) === "multiple") itemResponsibles(s).forEach(r => r.name && names.add(r.name));
-    else if (s.responsible) names.add(s.responsible);
-  });
+  Object.values(subtasks).forEach(s => { if (s.responsible) names.add(s.responsible); });
   return Array.from(names).sort();
+}
+function projectHasTaskNamed(projectId, name) {
+  const n = name.trim().toLowerCase();
+  return tasksOfProject(projectId).some(([id, t]) => (t.name || "").trim().toLowerCase() === n);
+}
+function taskHasSubtaskNamed(taskId, name) {
+  const n = name.trim().toLowerCase();
+  return subtasksOfTask(taskId).some(([id, s]) => (s.name || "").trim().toLowerCase() === n);
 }
 
 // ---------- Projects ----------
@@ -320,7 +382,7 @@ function collapseProject(projectId) {
   });
 }
 function reorderProjectsAfterDrop(draggedId, targetId) {
-  const list = Object.entries(projects).filter(([id, p]) => !p.isOthers).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+  const list = Object.entries(projects).filter(([id, p]) => !p.isOthers).sort(byOrder);
   const ids = list.map(([id]) => id);
   const fromIdx = ids.indexOf(draggedId), toIdx = ids.indexOf(targetId);
   if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
@@ -330,14 +392,7 @@ function reorderProjectsAfterDrop(draggedId, targetId) {
   reordered.forEach(([id], i) => db.ref("state/projects/" + id + "/order").set(i));
 }
 
-// ---------- Tasks ----------
-function addTask(projectId) {
-  const name = prompt("Task name:");
-  if (!name) return;
-  const list = tasksOfProject(projectId);
-  const maxOrder = Math.max(0, ...list.map(([id, t]) => t.order || 0));
-  db.ref("state/tasks").push().set(Object.assign({ projectId, name, order: maxOrder + 1 }, defaultTaskFields()));
-}
+// ---------- Tasks and subtasks ----------
 function collapseTask(taskId) {
   subtasksOfTask(taskId).forEach(([subId]) => expandedSubtasks.delete(subId));
 }
@@ -387,15 +442,6 @@ function removeResponsiblePerson(kind, id, idx) {
   list.splice(idx, 1);
   db.ref("state/" + kind + "s/" + id + "/responsibles").set(list);
 }
-function addSubtask(taskId) {
-  const name = prompt("Subtask name:");
-  if (!name) return;
-  const list = subtasksOfTask(taskId);
-  const maxOrder = Math.max(0, ...list.map(([id, s]) => s.order || 0));
-  db.ref("state/subtasks").push().set(Object.assign({ taskId, name, order: maxOrder + 1, priorityOrder: Date.now() }, defaultSubtaskFields()));
-  const task = tasks[taskId];
-  if (task && task.done) db.ref("state/tasks/" + taskId + "/done").set(false);
-}
 function deleteItem(kind, id) {
   const label = kind === "task" ? "task" : "subtask";
   if (!confirm("Delete this " + label + "? This cannot be undone.")) return;
@@ -430,13 +476,262 @@ function reorderSubtasksAfterDrop(taskId, draggedId, targetId) {
   reordered.forEach(([id], i) => db.ref("state/subtasks/" + id + "/order").set(i));
 }
 
+// ---------- Creating and copying ----------
+function createTaskWithCopies(projectId, name, targetIds) {
+  const maxOrder = Math.max(0, ...tasksOfProject(projectId).map(([id, t]) => t.order || 0));
+  const data = Object.assign({ projectId, name, order: maxOrder + 1 }, defaultTaskFields());
+  let groupId = null;
+  if (targetIds.length > 0) {
+    groupId = db.ref("state/tasks").push().key;
+    data.copyGroupId = groupId;
+  }
+  db.ref("state/tasks").push().set(data);
+  if (groupId) copyTaskInto(data, [], targetIds, groupId);
+}
+
+function copyTaskInto(src, srcSubs, targetIds, groupId) {
+  targetIds.forEach(pid => {
+    const maxOrder = Math.max(0, ...tasksOfProject(pid).map(([id, t]) => t.order || 0));
+    const ref = db.ref("state/tasks").push();
+    ref.set(Object.assign(defaultTaskFields(), {
+      projectId: pid,
+      name: src.name,
+      order: maxOrder + 1,
+      copyGroupId: groupId,
+      hasSubtasks: !!src.hasSubtasks,
+      responsibleMode: itemResponsibleMode(src),
+      responsible: src.responsible || "",
+      responsibles: itemResponsibles(src).map(r => ({ name: r.name || "", done: false })),
+      notes: src.hasSubtasks ? "" : (src.notes || "")
+    }));
+    if (src.hasSubtasks) {
+      srcSubs.forEach(([sid, s], i) => {
+        db.ref("state/subtasks").push().set(Object.assign(defaultSubtaskFields(), {
+          taskId: ref.key,
+          name: s.name,
+          order: i,
+          priorityOrder: Date.now() + i,
+          responsible: s.responsible || "",
+          notes: s.notes || ""
+        }));
+      });
+    }
+  });
+}
+
+function addSubtaskTo(taskId, name, person) {
+  const list = subtasksOfTask(taskId);
+  const maxOrder = Math.max(0, ...list.map(([id, s]) => s.order || 0));
+  db.ref("state/subtasks").push().set(Object.assign({ taskId, name, order: maxOrder + 1, priorityOrder: Date.now() }, defaultSubtaskFields(), { responsible: person }));
+  const task = tasks[taskId];
+  if (task) {
+    if (!task.hasSubtasks) db.ref("state/tasks/" + taskId).update({ hasSubtasks: true, ownDeadlineOn: false });
+    if (task.done) db.ref("state/tasks/" + taskId + "/done").set(false);
+  }
+}
+
+// ---------- Inline forms ----------
+function formHost(kind, ownerId) {
+  return addForm && addForm.kind === kind && addForm.ownerId === ownerId ? addForm.el : null;
+}
+function closeForm() { addForm = null; render(); }
+
+function buildTargetChecklist(candidates, getName) {
+  const el = document.createElement("div");
+  el.className = "targets";
+  if (candidates.length === 0) {
+    el.textContent = "No other projects yet.";
+    return { el, selected: () => [], refresh: () => {} };
+  }
+  const rows = candidates.map(c => {
+    const row = document.createElement("label");
+    row.className = "target-row";
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    const text = document.createElement("span");
+    text.textContent = c.label;
+    const note = document.createElement("span");
+    note.className = "dup-note";
+    row.appendChild(cb); row.appendChild(text); row.appendChild(note);
+    return { c, cb, note, row };
+  });
+  if (rows.length > 1) {
+    const allBtn = document.createElement("button");
+    allBtn.type = "button";
+    allBtn.className = "btn-text";
+    allBtn.textContent = "Select all";
+    allBtn.addEventListener("click", () => {
+      const allOn = rows.every(r => r.cb.checked);
+      rows.forEach(r => { r.cb.checked = !allOn; });
+      allBtn.textContent = allOn ? "Select all" : "Clear all";
+    });
+    el.appendChild(allBtn);
+  }
+  rows.forEach(r => el.appendChild(r.row));
+  function refresh() {
+    const name = getName();
+    rows.forEach(r => { r.note.textContent = name ? (r.c.noteFor(name) || "") : ""; });
+  }
+  return { el, selected: () => rows.filter(r => r.cb.checked).map(r => r.c.id), refresh };
+}
+
+function openAddTaskForm(projectId) {
+  const el = document.createElement("div");
+  el.className = "inline-form";
+  el.innerHTML = `
+    <label>Task name</label>
+    <input type="text" class="f-name" placeholder="Task name" />
+    <label class="check-row"><input type="checkbox" class="f-copy" /> Copy to other projects</label>
+    <div class="f-targets" style="display:none;"></div>
+    <p class="form-error"></p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-small f-save">Add task</button>
+      <button type="button" class="btn btn-secondary btn-small f-cancel">Cancel</button>
+    </div>`;
+  const nameInput = el.querySelector(".f-name");
+  const copyBox = el.querySelector(".f-copy");
+  const targetsBox = el.querySelector(".f-targets");
+  const candidates = Object.entries(projects).filter(([id]) => id !== projectId).sort(byOrder).map(([id, p]) => ({
+    id, label: p.name,
+    noteFor: (name) => projectHasTaskNamed(id, name) ? 'already has "' + name + '"' : ""
+  }));
+  const checklist = buildTargetChecklist(candidates, () => nameInput.value.trim());
+  targetsBox.appendChild(checklist.el);
+  nameInput.addEventListener("input", checklist.refresh);
+  copyBox.addEventListener("change", () => {
+    targetsBox.style.display = copyBox.checked ? "block" : "none";
+    checklist.refresh();
+  });
+  function save() {
+    const name = nameInput.value.trim();
+    if (!name) { el.querySelector(".form-error").textContent = "Enter a task name."; nameInput.focus(); return; }
+    const targets = copyBox.checked ? checklist.selected() : [];
+    createTaskWithCopies(projectId, name, targets);
+    closeForm();
+  }
+  el.querySelector(".f-save").addEventListener("click", save);
+  el.querySelector(".f-cancel").addEventListener("click", closeForm);
+  nameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") save(); });
+  addForm = { kind: "task", ownerId: projectId, el };
+  expandedProjects.add(projectId);
+  render();
+  nameInput.focus();
+}
+
+function openAddSubtaskForm(taskId) {
+  const task = tasks[taskId];
+  if (!task) return;
+  const siblings = task.copyGroupId
+    ? Object.entries(tasks).filter(([id, t]) => id !== taskId && t.copyGroupId === task.copyGroupId)
+    : [];
+  const el = document.createElement("div");
+  el.className = "inline-form";
+  el.innerHTML = `
+    <label>Subtask name</label>
+    <input type="text" class="f-name" placeholder="Subtask name" />
+    <label>Responsible</label>
+    <input type="text" class="f-person" placeholder="Name" list="people-list" />
+    ${siblings.length > 0 ? `
+      <label class="check-row"><input type="checkbox" class="f-copy" /> Also add to copies of this task</label>
+      <div class="f-targets" style="display:none;"></div>` : ""}
+    <p class="form-error"></p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-small f-save">Add subtask</button>
+      <button type="button" class="btn btn-secondary btn-small f-cancel">Cancel</button>
+    </div>`;
+  const nameInput = el.querySelector(".f-name");
+  const personInput = el.querySelector(".f-person");
+  const copyBox = el.querySelector(".f-copy");
+  const targetsBox = el.querySelector(".f-targets");
+  let checklist = null;
+  if (siblings.length > 0) {
+    const candidates = siblings.map(([sid, t]) => {
+      const proj = projects[t.projectId];
+      return {
+        id: sid,
+        label: proj ? proj.name : "Unknown project",
+        noteFor: (name) => {
+          if (taskHasSubtaskNamed(sid, name)) return 'already has "' + name + '"';
+          if (!t.hasSubtasks && hasRealNotes(t.notes)) return "its notes will be hidden";
+          return "";
+        }
+      };
+    });
+    checklist = buildTargetChecklist(candidates, () => nameInput.value.trim());
+    targetsBox.appendChild(checklist.el);
+    nameInput.addEventListener("input", checklist.refresh);
+    copyBox.addEventListener("change", () => {
+      targetsBox.style.display = copyBox.checked ? "block" : "none";
+      checklist.refresh();
+    });
+  }
+  function save() {
+    const name = nameInput.value.trim();
+    if (!name) { el.querySelector(".form-error").textContent = "Enter a subtask name."; nameInput.focus(); return; }
+    const person = personInput.value.trim();
+    addSubtaskTo(taskId, name, person);
+    if (checklist && copyBox.checked) checklist.selected().forEach(sid => addSubtaskTo(sid, name, person));
+    closeForm();
+  }
+  el.querySelector(".f-save").addEventListener("click", save);
+  el.querySelector(".f-cancel").addEventListener("click", closeForm);
+  nameInput.addEventListener("keydown", (e) => { if (e.key === "Enter") save(); });
+  personInput.addEventListener("keydown", (e) => { if (e.key === "Enter") save(); });
+  addForm = { kind: "subtask", ownerId: taskId, el };
+  expandedTasks.add(taskId);
+  render();
+  nameInput.focus();
+}
+
+function openCopyForm(taskId) {
+  const task = tasks[taskId];
+  if (!task) return;
+  const el = document.createElement("div");
+  el.className = "inline-form";
+  el.innerHTML = `
+    <label class="f-title-label">Copy to</label>
+    <div class="f-targets"></div>
+    <p class="form-hint">Subtasks, people and notes come along. Deadlines, Waiting, done status and the URL stay blank.</p>
+    <p class="form-error"></p>
+    <div class="form-actions">
+      <button type="button" class="btn btn-small f-save">Copy</button>
+      <button type="button" class="btn btn-secondary btn-small f-cancel">Cancel</button>
+    </div>`;
+  el.querySelector(".f-title-label").textContent = 'Copy "' + task.name + '" to';
+  const candidates = Object.entries(projects).filter(([id]) => id !== task.projectId).sort(byOrder).map(([id, p]) => ({
+    id, label: p.name,
+    noteFor: (name) => projectHasTaskNamed(id, name) ? 'already has "' + name + '"' : ""
+  }));
+  const checklist = buildTargetChecklist(candidates, () => task.name);
+  el.querySelector(".f-targets").appendChild(checklist.el);
+  checklist.refresh();
+  el.querySelector(".f-save").addEventListener("click", () => {
+    const targets = checklist.selected();
+    if (targets.length === 0) { el.querySelector(".form-error").textContent = "Pick at least one project."; return; }
+    const groupId = task.copyGroupId || db.ref("state/tasks").push().key;
+    if (!task.copyGroupId) updateItemField("task", taskId, "copyGroupId", groupId);
+    copyTaskInto(task, subtasksOfTask(taskId), targets, groupId);
+    closeForm();
+  });
+  el.querySelector(".f-cancel").addEventListener("click", closeForm);
+  addForm = { kind: "copy", ownerId: taskId, el };
+  render();
+}
+
 // ---------- Render ----------
 function render() {
+  const active = document.activeElement;
+  const wasInForm = !!(addForm && active && addForm.el.contains(active));
+  const sel = wasInForm && active.type === "text" && typeof active.selectionStart === "number" ? [active.selectionStart, active.selectionEnd] : null;
   pendingQuillInits = [];
   renderProjects();
   renderPriorityPerson();
   renderPeopleDatalist();
   pendingQuillInits.forEach(cfg => initQuillEditor(cfg));
+  if (wasInForm && document.body.contains(active)) {
+    active.focus();
+    if (sel) { try { active.setSelectionRange(sel[0], sel[1]); } catch (e) {} }
+  }
 }
 
 function initQuillEditor(cfg) {
@@ -465,30 +760,28 @@ function renderPeopleDatalist() {
   dl.innerHTML = collectAllNames().map(n => `<option value="${escapeAttr(n)}"></option>`).join("");
 }
 
-function renderEditMenu(kind, id, onRename, onDelete) {
+function renderEditMenu(kind, id, onRename, onDelete, onCopy) {
   const wrap = document.createElement("span");
   wrap.style.display = "inline-flex";
   wrap.style.gap = "4px";
-  const renameBtn = document.createElement("button");
-  renameBtn.className = "btn-text";
-  renameBtn.textContent = "Rename";
-  renameBtn.addEventListener("click", (e) => { e.stopPropagation(); onRename(); });
-  const deleteBtn = document.createElement("button");
-  deleteBtn.className = "btn-text danger";
-  deleteBtn.textContent = "Delete";
-  deleteBtn.addEventListener("click", (e) => { e.stopPropagation(); onDelete(); });
-  const cancelBtn = document.createElement("button");
-  cancelBtn.className = "btn-icon";
-  cancelBtn.textContent = "\u00d7";
-  cancelBtn.addEventListener("click", (e) => { e.stopPropagation(); editMenuOpen = null; render(); });
-  wrap.appendChild(renameBtn); wrap.appendChild(deleteBtn); wrap.appendChild(cancelBtn);
+  const mk = (cls, text, fn) => {
+    const b = document.createElement("button");
+    b.className = cls;
+    b.textContent = text;
+    b.addEventListener("click", (e) => { e.stopPropagation(); fn(); });
+    return b;
+  };
+  wrap.appendChild(mk("btn-text", "Rename", onRename));
+  if (onCopy) wrap.appendChild(mk("btn-text", "Copy to\u2026", onCopy));
+  wrap.appendChild(mk("btn-text danger", "Delete", onDelete));
+  wrap.appendChild(mk("btn-icon", "\u00d7", () => { editMenuOpen = null; render(); }));
   return wrap;
 }
 
 function renderProjects() {
   const container = document.getElementById("projects-list");
   container.innerHTML = "";
-  const entries = Object.entries(projects).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+  const entries = Object.entries(projects).sort(byOrder);
   entries.forEach(([projectId, project]) => {
     const box = document.createElement("div");
     box.className = "project-box";
@@ -539,11 +832,16 @@ function renderProjects() {
       const taskList = tasksOfProject(projectId);
       if (taskList.length === 0) body.innerHTML = `<div class="empty-note">No tasks yet.</div>`;
       taskList.forEach(([taskId, task]) => body.appendChild(renderTaskRow(taskId, task, projectId)));
-      const addTaskBtn = document.createElement("button");
-      addTaskBtn.className = "btn btn-secondary btn-small add-btn";
-      addTaskBtn.textContent = "+ Add task";
-      addTaskBtn.addEventListener("click", () => addTask(projectId));
-      body.appendChild(addTaskBtn);
+      const form = formHost("task", projectId);
+      if (form) {
+        body.appendChild(form);
+      } else {
+        const addTaskBtn = document.createElement("button");
+        addTaskBtn.className = "btn btn-secondary btn-small add-btn";
+        addTaskBtn.textContent = "+ Add task";
+        addTaskBtn.addEventListener("click", () => openAddTaskForm(projectId));
+        body.appendChild(addTaskBtn);
+      }
       box.appendChild(body);
     }
     container.appendChild(box);
@@ -573,7 +871,10 @@ function renderTaskRow(taskId, task, projectId) {
   header.querySelector('[data-role="check"]').addEventListener("click", (e) => { e.stopPropagation(); toggleItemDone("task", taskId); });
 
   if (menuOpen) {
-    header.appendChild(renderEditMenu("task", taskId, () => renameItem("task", taskId), () => deleteItem("task", taskId)));
+    header.appendChild(renderEditMenu("task", taskId,
+      () => renameItem("task", taskId),
+      () => deleteItem("task", taskId),
+      () => { editMenuOpen = null; openCopyForm(taskId); }));
   } else {
     const pencil = document.createElement("button");
     pencil.className = "btn-icon"; pencil.title = "Edit"; pencil.innerHTML = "&#9998;";
@@ -604,6 +905,9 @@ function renderTaskRow(taskId, task, projectId) {
   });
   row.appendChild(header);
 
+  const copyForm = formHost("copy", taskId);
+  if (copyForm) row.appendChild(copyForm);
+
   if (subsOpen) {
     const body = document.createElement("div");
     body.className = "task-row-body";
@@ -611,11 +915,16 @@ function renderTaskRow(taskId, task, projectId) {
     if (task.hasSubtasks) {
       if (subs.length === 0) { const en = document.createElement("div"); en.className = "empty-note"; en.textContent = "No subtasks yet."; body.appendChild(en); }
       subs.forEach(([subId, sub]) => body.appendChild(renderSubtaskRow(subId, sub, taskId)));
-      const addSubBtn = document.createElement("button");
-      addSubBtn.className = "btn btn-secondary btn-small add-btn";
-      addSubBtn.textContent = "+ Add subtask";
-      addSubBtn.addEventListener("click", () => addSubtask(taskId));
-      body.appendChild(addSubBtn);
+      const subForm = formHost("subtask", taskId);
+      if (subForm) {
+        body.appendChild(subForm);
+      } else {
+        const addSubBtn = document.createElement("button");
+        addSubBtn.className = "btn btn-secondary btn-small add-btn";
+        addSubBtn.textContent = "+ Add subtask";
+        addSubBtn.addEventListener("click", () => openAddSubtaskForm(taskId));
+        body.appendChild(addSubBtn);
+      }
     }
     row.appendChild(body);
   }
@@ -637,6 +946,7 @@ function renderSubtaskRow(subId, sub, taskId) {
   header.innerHTML = `
     <input type="checkbox" ${sub.done ? "checked" : ""} ${enabled ? "" : "disabled"} data-role="check" />
     <span class="name">${escapeHtml(sub.name)}${sub.done && sub.dateDone ? ` <span class="done-date">(done on ${formatDMY(sub.dateDone)})</span>` : ""}</span>
+    ${sub.responsible ? `<span class="meta-inline">${escapeHtml(sub.responsible)}</span>` : ""}
     ${badgeHtml(status)}
   `;
   header.querySelector('[data-role="check"]').addEventListener("click", (e) => { e.stopPropagation(); toggleItemDone("subtask", subId); });
@@ -679,6 +989,8 @@ function renderTaskFieldsPanel(taskId, task) {
   const fields = document.createElement("div");
   fields.className = "fields-panel";
   const mode = itemResponsibleMode(task);
+  const subs = subtasksOfTask(taskId);
+  const lockSubtasks = !!task.hasSubtasks && subs.length > 0;
   let responsibleHtml = "";
   if (mode === "single") {
     responsibleHtml = `
@@ -708,18 +1020,9 @@ function renderTaskFieldsPanel(taskId, task) {
       </div>`;
   }
   const quillElId = "quill-task-" + taskId;
-  fields.innerHTML = `
-    <div class="full has-subtasks-toggle">
-      <input type="checkbox" id="hastasks-${taskId}" ${task.hasSubtasks ? "checked" : ""} />
-      <label for="hastasks-${taskId}" style="margin:0;">This task has subtasks</label>
-    </div>
-    ${responsibleHtml}
-    <div class="full">
-      <label>URL</label>
-      <input type="text" data-field="url" value="${escapeAttr(task.url)}" placeholder="https://..." />
-      ${task.url ? `<div style="margin-top:4px;"><a class="url-link" href="${escapeAttr(task.url)}" target="_blank" rel="noopener">Open link &#8599;</a></div>` : ""}
-    </div>
-    ${!task.hasSubtasks ? `
+  let lowerHtml = "";
+  if (!task.hasSubtasks) {
+    lowerHtml = `
       <div>
         <label>Deadline</label>
         <input type="date" data-field="deadline" value="${escapeAttr(task.deadline)}" />
@@ -728,16 +1031,52 @@ function renderTaskFieldsPanel(taskId, task) {
         <input type="checkbox" id="waiting-task-${taskId}" ${task.waiting ? "checked" : ""} />
         <label for="waiting-task-${taskId}" style="margin:0;">Waiting</label>
       </div>
-      <div class="full"><label>Notes</label><div class="notes-wrap"><div id="${quillElId}"></div></div></div>
-    ` : ""}
+      <div class="full"><label>Notes</label><div class="notes-wrap"><div id="${quillElId}"></div></div></div>`;
+  } else {
+    lowerHtml = `
+      <div class="full">
+        <label>Next deadline (from subtasks)</label>
+        <div class="readonly-line">${escapeHtml(nextDeadlineText(taskId))}</div>
+      </div>
+      <div class="full has-subtasks-toggle">
+        <input type="checkbox" id="owndl-${taskId}" ${task.ownDeadlineOn ? "checked" : ""} />
+        <label for="owndl-${taskId}" style="margin:0;">This task needs its own deadline</label>
+      </div>
+      ${task.ownDeadlineOn ? `
+        <div class="full">
+          <label>Task deadline</label>
+          <input type="date" data-field="deadline" value="${escapeAttr(task.deadline)}" />
+        </div>` : ""}`;
+  }
+  fields.innerHTML = `
+    <div class="full has-subtasks-toggle">
+      <input type="checkbox" id="hastasks-${taskId}" ${task.hasSubtasks ? "checked" : ""} ${lockSubtasks ? "disabled" : ""} />
+      <label for="hastasks-${taskId}" style="margin:0;">This task has subtasks</label>
+    </div>
+    ${lockSubtasks ? `<div class="full hint">Delete the subtasks to turn this off.</div>` : ""}
+    ${responsibleHtml}
+    <div class="full">
+      <label>URL</label>
+      <input type="text" data-field="url" value="${escapeAttr(task.url)}" placeholder="https://..." />
+      ${task.url ? `<div style="margin-top:4px;"><a class="url-link" href="${escapeAttr(task.url)}" target="_blank" rel="noopener">Open link &#8599;</a></div>` : ""}
+    </div>
+    ${lowerHtml}
   `;
   const hasTasksCheckbox = fields.querySelector("#hastasks-" + taskId);
   if (hasTasksCheckbox) hasTasksCheckbox.addEventListener("change", (e) => {
-    if (e.target.checked && task.notes && task.notes.trim() !== "") {
-      const ok = confirm("This task's notes won't be shown anymore once subtasks are enabled. Copy anything important into a subtask's notes first. Continue?");
-      if (!ok) { e.target.checked = false; return; }
+    if (e.target.checked) {
+      if (hasRealNotes(task.notes)) {
+        const ok = confirm("This task's notes won't be shown anymore once subtasks are enabled. Copy anything important into a subtask's notes first. Continue?");
+        if (!ok) { e.target.checked = false; return; }
+      }
+      db.ref("state/tasks/" + taskId).update({ hasSubtasks: true, ownDeadlineOn: false });
+    } else {
+      db.ref("state/tasks/" + taskId).update({ hasSubtasks: false, ownDeadlineOn: false });
     }
-    updateItemField("task", taskId, "hasSubtasks", e.target.checked);
+  });
+  const ownDeadlineBox = fields.querySelector("#owndl-" + taskId);
+  if (ownDeadlineBox) ownDeadlineBox.addEventListener("change", (e) => {
+    db.ref("state/tasks/" + taskId).update({ ownDeadlineOn: e.target.checked, deadline: "" });
   });
   const waitingCheckbox = fields.querySelector("#waiting-task-" + taskId);
   if (waitingCheckbox) waitingCheckbox.addEventListener("change", (e) => updateItemField("task", taskId, "waiting", e.target.checked));
@@ -766,6 +1105,10 @@ function renderSubtaskFieldsPanel(subId, sub) {
   fields.className = "fields-panel";
   const quillElId = "quill-subtask-" + subId;
   fields.innerHTML = `
+    <div class="full">
+      <label>Responsible</label>
+      <input type="text" data-field="responsible" value="${escapeAttr(sub.responsible)}" placeholder="Name" list="people-list" />
+    </div>
     <div><label>Deadline</label><input type="date" data-field="deadline" value="${escapeAttr(sub.deadline)}" /></div>
     <div class="has-subtasks-toggle" style="align-self:end;">
       <input type="checkbox" id="waiting-subtask-${subId}" ${sub.waiting ? "checked" : ""} />
@@ -773,12 +1116,15 @@ function renderSubtaskFieldsPanel(subId, sub) {
     </div>
     <div class="full"><label>Notes</label><div class="notes-wrap"><div id="${quillElId}"></div></div></div>
   `;
-  fields.querySelector('[data-field="deadline"]').addEventListener("change", (e) => updateItemField("subtask", subId, "deadline", e.target.value));
+  fields.querySelectorAll('[data-field]').forEach(input => {
+    input.addEventListener("change", (e) => updateItemField("subtask", subId, e.target.dataset.field, e.target.value));
+  });
   fields.querySelector("#waiting-subtask-" + subId).addEventListener("change", (e) => updateItemField("subtask", subId, "waiting", e.target.checked));
   pendingQuillInits.push({ elId: quillElId, kind: "subtask", id: subId });
   return fields;
 }
 
+// ---------- Priorities by person ----------
 function goToItem(kind, id, taskId, task) {
   const projectId = task ? task.projectId : null;
   if (projectId) expandedProjects.add(projectId);
@@ -791,24 +1137,41 @@ function goToItem(kind, id, taskId, task) {
   }, 50);
 }
 
+function urlLinkHtml(u) {
+  return u ? `<a class="url-link" href="${escapeAttr(u)}" target="_blank" rel="noopener">Open link &#8599;</a>` : "\u2014";
+}
+
 function renderPriorityDetail(kind, id, item, taskId, task) {
   const detail = document.createElement("div");
   detail.className = "priority-item-detail";
-  if (item.hasSubtasks) {
+  const notesHtml = hasRealNotes(item.notes) ? `<div style="display:inline-block; vertical-align:top;">${item.notes}</div>` : "\u2014";
+  if (kind === "subtask") {
+    detail.innerHTML = `
+      <div><span class="label">Task: </span>${escapeHtml(task ? task.name : "")}</div>
+      <div><span class="label">Deadline: </span>${escapeHtml(item.deadline ? formatDMY(item.deadline) : "\u2014")}</div>
+      <div><span class="label">URL (task folder): </span>${urlLinkHtml(task && task.url)}</div>
+      <div><span class="label">Notes: </span>${notesHtml}</div>
+      <button class="btn btn-secondary btn-small" data-action="goto">Go to project &#8594;</button>
+    `;
+  } else if (item.hasSubtasks) {
     const subs = subtasksOfTask(id);
     const openSubs = subs.filter(([sid, s]) => !s.done);
-    const subsHtml = openSubs.length === 0 ? "<div style='color:#999;'>No open subtasks.</div>" : openSubs.map(([sid, s]) => `<div>• ${escapeHtml(s.name)}${s.deadline ? " — " + escapeHtml(s.deadline) : ""} ${badgeHtml(deadlineStatus(s))}</div>`).join("");
+    const subsHtml = openSubs.length === 0
+      ? "<div style='color:#999;'>No open subtasks.</div>"
+      : openSubs.map(([sid, s]) => `<div>\u2022 ${escapeHtml(s.name)}${s.responsible ? " (" + escapeHtml(s.responsible) + ")" : ""}${s.deadline ? " \u2014 " + escapeHtml(formatDMY(s.deadline)) : ""} ${badgeHtml(deadlineStatus(s))}</div>`).join("");
     detail.innerHTML = `
-      <div><span class="label">URL: </span>${item.url ? `<a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a>` : "—"}</div>
+      <div><span class="label">URL: </span>${urlLinkHtml(item.url)}</div>
+      ${item.ownDeadlineOn && item.deadline ? `<div><span class="label">Task deadline: </span>${escapeHtml(formatDMY(item.deadline))}</div>` : ""}
+      <div><span class="label">Next deadline (from subtasks): </span>${escapeHtml(nextDeadlineText(id))}</div>
       <div style="margin-top:6px;"><span class="label">Open subtasks:</span></div>
       ${subsHtml}
       <button class="btn btn-secondary btn-small" data-action="goto" style="margin-top:6px;">Go to project &#8594;</button>
     `;
   } else {
     detail.innerHTML = `
-      <div><span class="label">Deadline: </span>${escapeHtml(item.deadline || "—")}</div>
-      <div><span class="label">URL: </span>${item.url ? `<a class="url-link" href="${escapeAttr(item.url)}" target="_blank" rel="noopener">Open link &#8599;</a>` : "—"}</div>
-      <div><span class="label">Notes: </span>${item.notes ? `<div style="display:inline-block; vertical-align:top;">${item.notes}</div>` : "—"}</div>
+      <div><span class="label">Deadline: </span>${escapeHtml(item.deadline ? formatDMY(item.deadline) : "\u2014")}</div>
+      <div><span class="label">URL: </span>${urlLinkHtml(item.url)}</div>
+      <div><span class="label">Notes: </span>${notesHtml}</div>
       <button class="btn btn-secondary btn-small" data-action="goto">Go to project &#8594;</button>
     `;
   }
@@ -816,19 +1179,38 @@ function renderPriorityDetail(kind, id, item, taskId, task) {
   return detail;
 }
 
-function renderPriorityPerson() {
-  const container = document.getElementById("priority-list-person");
-  container.innerHTML = "";
+function buildPriorityGroups() {
   const grouped = {};
-  function addEntry(personName, kind, id, item, taskId) {
-    if (!grouped[personName]) grouped[personName] = [];
-    grouped[personName].push({ kind, id, item, taskId });
+  function addEntry(person, kind, id, item, taskId) {
+    if (!grouped[person]) grouped[person] = [];
+    grouped[person].push({ kind, id, item, taskId });
   }
   Object.entries(tasks).forEach(([id, t]) => {
     if (t.done) return;
-    if (itemResponsibleMode(t) === "multiple") itemResponsibles(t).forEach(r => { if (r.name && !r.done) addEntry(r.name, "task", id, t, null); });
-    else if (t.responsible) addEntry(t.responsible, "task", id, t, null);
+    const people = [];
+    if (itemResponsibleMode(t) === "multiple") itemResponsibles(t).forEach(r => { if (r.name && !r.done) people.push(r.name); });
+    else if (t.responsible) people.push(t.responsible);
+    people.forEach(person => {
+      if (t.hasSubtasks) {
+        const ownOpen = subtasksOfTask(id).some(([sid, s]) => !s.done && s.responsible === person);
+        if (ownOpen) return;
+      }
+      addEntry(person, "task", id, t, null);
+    });
   });
+  Object.entries(subtasks).forEach(([id, s]) => {
+    if (s.done || !s.responsible) return;
+    const parent = tasks[s.taskId];
+    if (!parent || !parent.hasSubtasks) return;
+    addEntry(s.responsible, "subtask", id, s, s.taskId);
+  });
+  return grouped;
+}
+
+function renderPriorityPerson() {
+  const container = document.getElementById("priority-list-person");
+  container.innerHTML = "";
+  const grouped = buildPriorityGroups();
   const people = Object.keys(grouped).sort((a, b) => {
     const ia = personPriorityOrder.indexOf(a), ib = personPriorityOrder.indexOf(b);
     const ra = ia === -1 ? 1e9 : ia, rb = ib === -1 ? 1e9 : ib;
@@ -885,11 +1267,16 @@ function renderPriorityGroup(person, list, currentOrder) {
 
 function renderPriorityItem(entry, list, groupKey) {
   const { kind, id, item, taskId } = entry;
-  const task = item;
-  const project = task ? projects[task.projectId] : null;
-  const status = computeEffectiveTaskStatus(id, task);
+  const parent = kind === "subtask" ? tasks[taskId] : item;
+  const project = parent ? projects[parent.projectId] : null;
+  const status = kind === "subtask" ? deadlineStatus(item) : computeEffectiveTaskStatus(id, item);
   const key = groupKey + "-" + kind + "-" + id;
   const isExpanded = expandedPriorityItems.has(key);
+  let tagText = "";
+  if (kind === "subtask") tagText = (parent ? parent.name : "") + (project ? " \u00b7 " + project.name : "");
+  else tagText = project ? project.name : "";
+  const subsList = kind === "task" && item.hasSubtasks ? subtasksOfTask(id) : [];
+  const readyToClose = subsList.length > 0 && subsList.every(([sid, s]) => s.done);
 
   const wrap = document.createElement("div");
   wrap.className = "priority-item";
@@ -900,8 +1287,9 @@ function renderPriorityItem(entry, list, groupKey) {
   header.innerHTML = `
     <span class="drag-handle" title="Drag to reorder" aria-hidden="true">&#8942;&#8942;</span>
     <span class="name">${escapeHtml(item.name)}</span>
+    ${readyToClose ? `<span class="tag-ready">ready to close</span>` : ""}
     ${badgeHtml(status)}
-    ${project ? `<span class="tag">${escapeHtml(project.name)}</span>` : ""}
+    ${tagText ? `<span class="tag">${escapeHtml(tagText)}</span>` : ""}
   `;
   header.addEventListener("click", (e) => {
     if (e.target.closest(".drag-handle")) return;
@@ -909,7 +1297,7 @@ function renderPriorityItem(entry, list, groupKey) {
     render();
   });
   wrap.appendChild(header);
-  if (isExpanded) wrap.appendChild(renderPriorityDetail(kind, id, item, taskId, task));
+  if (isExpanded) wrap.appendChild(renderPriorityDetail(kind, id, item, taskId, parent));
 
   wrap.addEventListener("dragstart", (e) => { dragState = { id, kind, groupKey }; wrap.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
   wrap.addEventListener("dragend", () => { wrap.classList.remove("dragging"); dragState = null; });
