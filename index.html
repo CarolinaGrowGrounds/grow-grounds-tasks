@@ -128,6 +128,17 @@
   .inline-form .form-error { color: #a33; font-size: 12px; margin: 0 0 6px; }
   .inline-form .form-error:empty { display: none; }
   .inline-form .form-hint { color: #777; font-size: 12px; margin: 0 0 8px; }
+
+  .who-label { font-size: 13px; color: #555; }
+  .who-select { font-size: 13px; padding: 4px 6px; border: 1px solid #ccc; border-radius: 4px; background: #fff; max-width: 170px; }
+  .me-chip { font-size: 11px; color: #ffffff; background: #2f6b3a; padding: 1px 7px; border-radius: 10px; }
+  .nest-options { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12.5px; color: #35563c; margin: 0 0 8px; }
+  .nest-options label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+  .subgroup-header { display: flex; align-items: center; gap: 8px; padding: 6px 10px; cursor: pointer; background: #f3f6f3; border: 1px solid #dfe8e0; border-radius: 6px; margin: 8px 0 5px; font-size: 13px; font-weight: 600; color: #1b4d24; }
+  .subgroup-header.level2 { margin-left: 14px; background: #fafcfa; font-weight: 500; }
+  .subgroup-header .gname { flex: 1; }
+  .subgroup-header .count { font-size: 11px; color: #4a7a52; background: #d8ecd9; padding: 1px 7px; border-radius: 10px; }
+  .subgroup-body.level2 { margin-left: 14px; }
 </style>
 </head>
 <body>
@@ -142,6 +153,8 @@
   <header>
     <h1>Grow Grounds — Task Coordination</h1>
     <div class="user-info">
+      <label for="my-name-select" class="who-label">Showing as</label>
+      <select id="my-name-select" class="who-select"></select>
       <span id="user-email"></span>
       <button class="btn btn-secondary btn-small" id="signout-btn">Sign out</button>
     </div>
@@ -198,6 +211,9 @@ let groupDragState = null;
 let personPriorityOrder = [];
 let pendingQuillInits = [];
 let addForm = null;
+let userPrefs = {};
+let nameDisplay = {};
+let lastSelectSig = "";
 
 document.getElementById("login-btn").addEventListener("click", () => {
   const provider = new firebase.auth.OAuthProvider("microsoft.com");
@@ -234,6 +250,7 @@ function startListeners() {
   db.ref("state/tasks").on("value", snap => { tasks = snap.val() || {}; render(); });
   db.ref("state/subtasks").on("value", snap => { subtasks = snap.val() || {}; render(); });
   db.ref("state/personPriorityOrder").on("value", snap => { personPriorityOrder = snap.val() || []; render(); });
+  if (currentUser && currentUser.uid) db.ref("state/userPrefs/" + currentUser.uid).on("value", snap => { userPrefs = snap.val() || {}; render(); });
 }
 
 function ensureGeneralProject() {
@@ -334,14 +351,98 @@ function computeEffectiveTaskStatus(taskId, task) {
   open.forEach(s => { worst = worseStatus(worst, deadlineStatus(s)); });
   return worst;
 }
-function collectAllNames() {
-  const names = new Set();
+function normName(n) { return (n || "").trim().replace(/\s+/g, " ").toLowerCase(); }
+function safeKey(k) { return encodeURIComponent(k).replace(/\./g, "%2E"); }
+
+function buildNameDisplay() {
+  const counts = {};
+  function add(n) {
+    const s = (n || "").trim().replace(/\s+/g, " ");
+    if (!s) return;
+    const k = s.toLowerCase();
+    if (!counts[k]) counts[k] = {};
+    counts[k][s] = (counts[k][s] || 0) + 1;
+  }
   Object.values(tasks).forEach(t => {
-    if (itemResponsibleMode(t) === "multiple") itemResponsibles(t).forEach(r => r.name && names.add(r.name));
-    else if (t.responsible) names.add(t.responsible);
+    if (t.responsible) add(t.responsible);
+    itemResponsibles(t).forEach(r => add(r.name));
   });
-  Object.values(subtasks).forEach(s => { if (s.responsible) names.add(s.responsible); });
-  return Array.from(names).sort();
+  Object.values(subtasks).forEach(s => add(s.responsible));
+  const map = {};
+  Object.keys(counts).forEach(k => {
+    const spellings = Object.entries(counts[k]).sort((a, b) => {
+      const ua = /^[A-Z]/.test(a[0]) ? 0 : 1, ub = /^[A-Z]/.test(b[0]) ? 0 : 1;
+      if (ua !== ub) return ua - ub;
+      if (b[1] !== a[1]) return b[1] - a[1];
+      return a[0].localeCompare(b[0]);
+    });
+    map[k] = spellings[0][0];
+  });
+  nameDisplay = map;
+}
+function canonicalName(n) {
+  const t = (n || "").trim().replace(/\s+/g, " ");
+  if (!t) return "";
+  return nameDisplay[t.toLowerCase()] || t;
+}
+function collectAllNames() {
+  return Object.values(nameDisplay).sort((a, b) => a.localeCompare(b));
+}
+function guessMyKey() {
+  if (!currentUser || !currentUser.email) return null;
+  const local = currentUser.email.split("@")[0].toLowerCase();
+  let best = null;
+  Object.keys(nameDisplay).forEach(k => {
+    if (k.length >= 2 && local.startsWith(k) && (!best || k.length > best.length)) best = k;
+  });
+  return best;
+}
+function currentMyKey() {
+  const pref = userPrefs && userPrefs.myName;
+  if (pref) return pref;
+  return guessMyKey();
+}
+function nestPref(key) {
+  const n = userPrefs && userPrefs.nest && userPrefs.nest[safeKey(key)];
+  return { project: !!(n && n.project), status: !!(n && n.status) };
+}
+function setNestPref(key, partial) {
+  if (!currentUser || !currentUser.uid) return;
+  const next = Object.assign({}, nestPref(key), partial);
+  db.ref("state/userPrefs/" + currentUser.uid + "/nest/" + safeKey(key)).set(next);
+}
+function sortDoneLast(entries) {
+  const open = entries.filter(([id, x]) => !x.done);
+  const done = entries.filter(([id, x]) => x.done).sort((a, b) => {
+    const da = a[1].dateDone || "", dbb = b[1].dateDone || "";
+    if (da !== dbb) return da < dbb ? -1 : 1;
+    return (a[1].order || 0) - (b[1].order || 0);
+  });
+  return open.concat(done);
+}
+function displayTasksOfProject(projectId) { return sortDoneLast(tasksOfProject(projectId)); }
+function displaySubtasksOfTask(taskId) { return sortDoneLast(subtasksOfTask(taskId)); }
+
+function renderHeaderSelect() {
+  const sel = document.getElementById("my-name-select");
+  if (!sel) return;
+  const guess = guessMyKey();
+  const keys = Object.keys(nameDisplay).sort((a, b) => nameDisplay[a].localeCompare(nameDisplay[b]));
+  const selected = (userPrefs && userPrefs.myName) || "";
+  const autoLabel = "Auto (" + (guess ? nameDisplay[guess] : "no match") + ")";
+  const sig = JSON.stringify([autoLabel, keys.map(k => nameDisplay[k]), selected]);
+  if (sig === lastSelectSig) return;
+  lastSelectSig = sig;
+  sel.innerHTML = "";
+  const o0 = document.createElement("option");
+  o0.value = ""; o0.textContent = autoLabel;
+  sel.appendChild(o0);
+  keys.forEach(k => {
+    const o = document.createElement("option");
+    o.value = k; o.textContent = nameDisplay[k];
+    sel.appendChild(o);
+  });
+  sel.value = selected;
 }
 function projectHasTaskNamed(projectId, name) {
   const n = name.trim().toLowerCase();
@@ -668,7 +769,7 @@ function openAddSubtaskForm(taskId) {
   function save() {
     const name = nameInput.value.trim();
     if (!name) { el.querySelector(".form-error").textContent = "Enter a subtask name."; nameInput.focus(); return; }
-    const person = personInput.value.trim();
+    const person = canonicalName(personInput.value);
     addSubtaskTo(taskId, name, person);
     if (checklist && copyBox.checked) checklist.selected().forEach(sid => addSubtaskTo(sid, name, person));
     closeForm();
@@ -724,6 +825,8 @@ function render() {
   const wasInForm = !!(addForm && active && addForm.el.contains(active));
   const sel = wasInForm && active.type === "text" && typeof active.selectionStart === "number" ? [active.selectionStart, active.selectionEnd] : null;
   pendingQuillInits = [];
+  buildNameDisplay();
+  renderHeaderSelect();
   renderProjects();
   renderPriorityPerson();
   renderPeopleDatalist();
@@ -829,7 +932,7 @@ function renderProjects() {
     if (isExpanded) {
       const body = document.createElement("div");
       body.className = "project-body";
-      const taskList = tasksOfProject(projectId);
+      const taskList = displayTasksOfProject(projectId);
       if (taskList.length === 0) body.innerHTML = `<div class="empty-note">No tasks yet.</div>`;
       taskList.forEach(([taskId, task]) => body.appendChild(renderTaskRow(taskId, task, projectId)));
       const form = formHost("task", projectId);
@@ -861,7 +964,7 @@ function renderTaskRow(taskId, task, projectId) {
 
   const header = document.createElement("div");
   header.className = "task-row-header";
-  header.draggable = true;
+  header.draggable = !task.done;
   header.innerHTML = `
     <input type="checkbox" ${task.done ? "checked" : ""} ${enabled ? "" : "disabled"} data-role="check" />
     <span class="name">${escapeHtml(task.name)}${task.done && task.dateDone ? ` <span class="done-date">(done on ${formatDMY(task.dateDone)})</span>` : ""}</span>
@@ -896,10 +999,10 @@ function renderTaskRow(taskId, task, projectId) {
   });
   header.addEventListener("dragstart", (e) => { dragState = { type: "task", id: taskId, projectId }; row.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
   header.addEventListener("dragend", () => { row.classList.remove("dragging"); dragState = null; });
-  header.addEventListener("dragover", (e) => { if (dragState && dragState.type === "task" && dragState.projectId === projectId) e.preventDefault(); });
+  header.addEventListener("dragover", (e) => { if (dragState && dragState.type === "task" && dragState.projectId === projectId && !task.done) e.preventDefault(); });
   header.addEventListener("drop", (e) => {
     e.preventDefault();
-    if (!dragState || dragState.type !== "task" || dragState.projectId !== projectId) return;
+    if (!dragState || dragState.type !== "task" || dragState.projectId !== projectId || task.done) return;
     reorderTasksAfterDrop(projectId, dragState.id, taskId);
     dragState = null;
   });
@@ -914,7 +1017,7 @@ function renderTaskRow(taskId, task, projectId) {
     body.appendChild(renderTaskFieldsPanel(taskId, task));
     if (task.hasSubtasks) {
       if (subs.length === 0) { const en = document.createElement("div"); en.className = "empty-note"; en.textContent = "No subtasks yet."; body.appendChild(en); }
-      subs.forEach(([subId, sub]) => body.appendChild(renderSubtaskRow(subId, sub, taskId)));
+      displaySubtasksOfTask(taskId).forEach(([subId, sub]) => body.appendChild(renderSubtaskRow(subId, sub, taskId)));
       const subForm = formHost("subtask", taskId);
       if (subForm) {
         body.appendChild(subForm);
@@ -942,7 +1045,7 @@ function renderSubtaskRow(subId, sub, taskId) {
 
   const header = document.createElement("div");
   header.className = "subtask-row-header";
-  header.draggable = true;
+  header.draggable = !sub.done;
   header.innerHTML = `
     <input type="checkbox" ${sub.done ? "checked" : ""} ${enabled ? "" : "disabled"} data-role="check" />
     <span class="name">${escapeHtml(sub.name)}${sub.done && sub.dateDone ? ` <span class="done-date">(done on ${formatDMY(sub.dateDone)})</span>` : ""}</span>
@@ -973,10 +1076,10 @@ function renderSubtaskRow(subId, sub, taskId) {
   });
   header.addEventListener("dragstart", (e) => { dragState = { type: "subtask", id: subId, taskId }; row.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
   header.addEventListener("dragend", () => { row.classList.remove("dragging"); dragState = null; });
-  header.addEventListener("dragover", (e) => { if (dragState && dragState.type === "subtask" && dragState.taskId === taskId) e.preventDefault(); });
+  header.addEventListener("dragover", (e) => { if (dragState && dragState.type === "subtask" && dragState.taskId === taskId && !sub.done) e.preventDefault(); });
   header.addEventListener("drop", (e) => {
     e.preventDefault();
-    if (!dragState || dragState.type !== "subtask" || dragState.taskId !== taskId) return;
+    if (!dragState || dragState.type !== "subtask" || dragState.taskId !== taskId || sub.done) return;
     reorderSubtasksAfterDrop(taskId, dragState.id, subId);
     dragState = null;
   });
@@ -1084,6 +1187,7 @@ function renderTaskFieldsPanel(taskId, task) {
     input.addEventListener("change", (e) => {
       const field = e.target.dataset.field;
       if (field === "responsibleMode") setResponsibleMode("task", taskId, e.target.value);
+      else if (field === "responsible") updateItemField("task", taskId, field, canonicalName(e.target.value));
       else updateItemField("task", taskId, field, e.target.value);
     });
   });
@@ -1093,7 +1197,7 @@ function renderTaskFieldsPanel(taskId, task) {
     const idx = parseInt(el.dataset.respIdx, 10);
     const action = el.dataset.respAction;
     if (action === "check") el.addEventListener("change", (e) => updateResponsiblePerson("task", taskId, idx, "done", e.target.checked));
-    if (action === "name") el.addEventListener("change", (e) => updateResponsiblePerson("task", taskId, idx, "name", e.target.value));
+    if (action === "name") el.addEventListener("change", (e) => updateResponsiblePerson("task", taskId, idx, "name", canonicalName(e.target.value)));
     if (action === "remove") el.addEventListener("click", () => removeResponsiblePerson("task", taskId, idx));
   });
   if (!task.hasSubtasks) pendingQuillInits.push({ elId: quillElId, kind: "task", id: taskId });
@@ -1117,7 +1221,10 @@ function renderSubtaskFieldsPanel(subId, sub) {
     <div class="full"><label>Notes</label><div class="notes-wrap"><div id="${quillElId}"></div></div></div>
   `;
   fields.querySelectorAll('[data-field]').forEach(input => {
-    input.addEventListener("change", (e) => updateItemField("subtask", subId, e.target.dataset.field, e.target.value));
+    input.addEventListener("change", (e) => {
+      const f = e.target.dataset.field;
+      updateItemField("subtask", subId, f, f === "responsible" ? canonicalName(e.target.value) : e.target.value);
+    });
   });
   fields.querySelector("#waiting-subtask-" + subId).addEventListener("change", (e) => updateItemField("subtask", subId, "waiting", e.target.checked));
   pendingQuillInits.push({ elId: quillElId, kind: "subtask", id: subId });
@@ -1181,28 +1288,30 @@ function renderPriorityDetail(kind, id, item, taskId, task) {
 
 function buildPriorityGroups() {
   const grouped = {};
-  function addEntry(person, kind, id, item, taskId) {
-    if (!grouped[person]) grouped[person] = [];
-    grouped[person].push({ kind, id, item, taskId });
+  function addEntry(key, kind, id, item, taskId) {
+    if (!key) return;
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push({ kind, id, item, taskId });
   }
   Object.entries(tasks).forEach(([id, t]) => {
     if (t.done) return;
-    const people = [];
-    if (itemResponsibleMode(t) === "multiple") itemResponsibles(t).forEach(r => { if (r.name && !r.done) people.push(r.name); });
-    else if (t.responsible) people.push(t.responsible);
-    people.forEach(person => {
+    const keys = new Set();
+    if (itemResponsibleMode(t) === "multiple") itemResponsibles(t).forEach(r => { if (r.name && !r.done) keys.add(normName(r.name)); });
+    else if (t.responsible) keys.add(normName(t.responsible));
+    keys.forEach(k => {
+      if (!k) return;
       if (t.hasSubtasks) {
-        const ownOpen = subtasksOfTask(id).some(([sid, s]) => !s.done && s.responsible === person);
+        const ownOpen = subtasksOfTask(id).some(([sid, s]) => !s.done && normName(s.responsible) === k);
         if (ownOpen) return;
       }
-      addEntry(person, "task", id, t, null);
+      addEntry(k, "task", id, t, null);
     });
   });
   Object.entries(subtasks).forEach(([id, s]) => {
     if (s.done || !s.responsible) return;
     const parent = tasks[s.taskId];
     if (!parent || !parent.hasSubtasks) return;
-    addEntry(s.responsible, "subtask", id, s, s.taskId);
+    addEntry(normName(s.responsible), "subtask", id, s, s.taskId);
   });
   return grouped;
 }
@@ -1211,61 +1320,155 @@ function renderPriorityPerson() {
   const container = document.getElementById("priority-list-person");
   container.innerHTML = "";
   const grouped = buildPriorityGroups();
-  const people = Object.keys(grouped).sort((a, b) => {
-    const ia = personPriorityOrder.indexOf(a), ib = personPriorityOrder.indexOf(b);
-    const ra = ia === -1 ? 1e9 : ia, rb = ib === -1 ? 1e9 : ib;
+  const me = currentMyKey();
+  const rawOrder = Array.isArray(personPriorityOrder) ? personPriorityOrder : Object.values(personPriorityOrder || {});
+  const savedOrder = [];
+  rawOrder.forEach(n => { const k = normName(n); if (k && !savedOrder.includes(k)) savedOrder.push(k); });
+  const rank = (k) => { const i = savedOrder.indexOf(k); return i === -1 ? 1e9 : i; };
+  const keys = Object.keys(grouped).sort((a, b) => {
+    if (a === me) return -1;
+    if (b === me) return 1;
+    const ra = rank(a), rb = rank(b);
     if (ra !== rb) return ra - rb;
-    return a.localeCompare(b);
+    return (nameDisplay[a] || a).localeCompare(nameDisplay[b] || b);
   });
-  if (people.length === 0) { container.innerHTML = `<div class="empty-note">No open items with a responsible person yet.</div>`; return; }
-  const currentOrder = people.slice();
-  people.forEach(person => {
-    const list = grouped[person].sort((a, b) => (a.item.priorityOrder || 0) - (b.item.priorityOrder || 0));
-    container.appendChild(renderPriorityGroup(person, list, currentOrder));
+  if (keys.length === 0) { container.innerHTML = `<div class="empty-note">No open items with a responsible person yet.</div>`; return; }
+  keys.forEach(k => {
+    const list = grouped[k].sort((a, b) => (a.item.priorityOrder || 0) - (b.item.priorityOrder || 0));
+    container.appendChild(renderPriorityGroup(k, list, keys, savedOrder, me));
   });
 }
 
-function renderPriorityGroup(person, list, currentOrder) {
-  const groupKey = "person-" + person;
+function renderPriorityGroup(key, list, visibleKeys, savedOrder, me) {
+  const person = nameDisplay[key] || key;
+  const isMe = key === me;
+  const groupKey = "person-" + key;
   const isCollapsed = collapsedGroups.has(groupKey);
   const groupDiv = document.createElement("div");
   groupDiv.className = "priority-group";
   const header = document.createElement("div");
   header.className = "priority-group-header";
-  header.draggable = true;
-  header.innerHTML = `<span class="drag-handle" title="Drag to reorder" aria-hidden="true">&#8942;&#8942;</span><span class="gname">${escapeHtml(person)}</span><span class="count">${list.length}</span><span>${isCollapsed ? "&#9660;" : "&#9650;"}</span>`;
+  header.draggable = !isMe;
+  header.innerHTML = `${isMe ? "" : `<span class="drag-handle" title="Drag to reorder" aria-hidden="true">&#8942;&#8942;</span>`}<span class="gname">${escapeHtml(person)}</span>${isMe ? `<span class="me-chip">you</span>` : ""}<span class="count">${list.length}</span><span>${isCollapsed ? "&#9660;" : "&#9650;"}</span>`;
   header.addEventListener("click", (e) => {
     if (e.target.closest(".drag-handle")) return;
     if (collapsedGroups.has(groupKey)) collapsedGroups.delete(groupKey); else collapsedGroups.add(groupKey);
     render();
   });
-  header.addEventListener("dragstart", () => { groupDragState = { id: person }; });
-  header.addEventListener("dragover", (e) => { e.preventDefault(); });
-  header.addEventListener("drop", (e) => {
-    e.preventDefault();
-    if (!groupDragState) return;
-    const order = currentOrder.slice();
-    const fromIdx = order.indexOf(groupDragState.id);
-    const toIdx = order.indexOf(person);
-    if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
-    const [moved] = order.splice(fromIdx, 1);
-    order.splice(toIdx, 0, moved);
-    db.ref("state/personPriorityOrder").set(order);
-    groupDragState = null;
-  });
+  if (!isMe) {
+    header.addEventListener("dragstart", () => { groupDragState = { id: key }; });
+    header.addEventListener("dragend", () => { groupDragState = null; });
+    header.addEventListener("dragover", (e) => { if (groupDragState) e.preventDefault(); });
+    header.addEventListener("drop", (e) => {
+      e.preventDefault();
+      if (!groupDragState) return;
+      const base = savedOrder.slice();
+      visibleKeys.forEach(k => { if (!base.includes(k)) base.push(k); });
+      const fromIdx = base.indexOf(groupDragState.id), toIdx = base.indexOf(key);
+      if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
+      const [moved] = base.splice(fromIdx, 1);
+      base.splice(toIdx, 0, moved);
+      db.ref("state/personPriorityOrder").set(base.map(k => nameDisplay[k] || k));
+      groupDragState = null;
+    });
+  }
   groupDiv.appendChild(header);
 
   if (!isCollapsed) {
     const body = document.createElement("div");
     body.className = "priority-group-body";
-    if (list.length === 0) body.innerHTML = `<div class="empty-note">Nothing here.</div>`;
-    list.forEach(entry => body.appendChild(renderPriorityItem(entry, list, groupKey)));
+    const nest = nestPref(key);
+    const opts = document.createElement("div");
+    opts.className = "nest-options";
+    opts.innerHTML = `<label><input type="checkbox" data-nest="project" ${nest.project ? "checked" : ""} /> Group by project</label><label><input type="checkbox" data-nest="status" ${nest.status ? "checked" : ""} /> Group by status</label>`;
+    opts.querySelectorAll("input").forEach(cb => cb.addEventListener("change", () => setNestPref(key, { [cb.dataset.nest]: cb.checked })));
+    body.appendChild(opts);
+    renderPriorityEntries(body, list, groupKey, nest);
     groupDiv.appendChild(body);
   }
   return groupDiv;
 }
 
-function renderPriorityItem(entry, list, groupKey) {
+function renderPriorityEntries(body, list, groupKey, nest) {
+  list.forEach(en => {
+    const parent = en.kind === "subtask" ? tasks[en.taskId] : en.item;
+    en.projectId = parent ? parent.projectId : "";
+    en.status = en.kind === "subtask" ? deadlineStatus(en.item) : computeEffectiveTaskStatus(en.id, en.item);
+  });
+  const addItems = (container, entries, scopeKey) => entries.forEach(en => container.appendChild(renderPriorityItem(en, list, groupKey, scopeKey)));
+
+  function subHeader(labelHtml, count, subKey, level) {
+    const h = document.createElement("div");
+    h.className = "subgroup-header" + (level === 2 ? " level2" : "");
+    const collapsed = collapsedGroups.has(subKey);
+    h.innerHTML = `<span class="gname">${labelHtml}</span><span class="count">${count}</span><span>${collapsed ? "&#9660;" : "&#9650;"}</span>`;
+    h.addEventListener("click", () => {
+      if (collapsedGroups.has(subKey)) collapsedGroups.delete(subKey); else collapsedGroups.add(subKey);
+      render();
+    });
+    return { el: h, collapsed };
+  }
+  const statusLabel = (st) => st === "done" ? `<span class="badge badge-done">Ready to close</span>` : badgeHtml(st);
+  function statusBuckets(entries) {
+    return ["overdue", "urgent", "waiting", "important", "keep", "done"]
+      .map(st => ({ st, entries: entries.filter(e => e.status === st) }))
+      .filter(b => b.entries.length > 0);
+  }
+  function projectBuckets(entries) {
+    const ids = [];
+    entries.forEach(e => { if (!ids.includes(e.projectId)) ids.push(e.projectId); });
+    ids.sort((a, b) => {
+      const pa = projects[a], pb = projects[b];
+      if (!pa) return 1;
+      if (!pb) return -1;
+      return (pa.order || 0) - (pb.order || 0);
+    });
+    return ids.map(pid => ({ pid, label: projects[pid] ? projects[pid].name : "No project", entries: entries.filter(e => e.projectId === pid) }));
+  }
+  function bodyWrap(level2) {
+    const w = document.createElement("div");
+    w.className = "subgroup-body" + (level2 ? " level2" : "");
+    return w;
+  }
+
+  if (!nest.project && !nest.status) { addItems(body, list, groupKey); return; }
+
+  if (nest.project) {
+    projectBuckets(list).forEach(pb => {
+      const pKey = groupKey + "|p:" + pb.pid;
+      const ph = subHeader(escapeHtml(pb.label), pb.entries.length, pKey, 1);
+      body.appendChild(ph.el);
+      if (ph.collapsed) return;
+      if (nest.status) {
+        statusBuckets(pb.entries).forEach(sb => {
+          const sKey = pKey + "|s:" + sb.st;
+          const sh = subHeader(statusLabel(sb.st), sb.entries.length, sKey, 2);
+          body.appendChild(sh.el);
+          if (sh.collapsed) return;
+          const wrap = bodyWrap(true);
+          addItems(wrap, sb.entries, sKey);
+          body.appendChild(wrap);
+        });
+      } else {
+        const wrap = bodyWrap(false);
+        addItems(wrap, pb.entries, pKey);
+        body.appendChild(wrap);
+      }
+    });
+  } else {
+    statusBuckets(list).forEach(sb => {
+      const sKey = groupKey + "|s:" + sb.st;
+      const sh = subHeader(statusLabel(sb.st), sb.entries.length, sKey, 1);
+      body.appendChild(sh.el);
+      if (sh.collapsed) return;
+      const wrap = bodyWrap(false);
+      addItems(wrap, sb.entries, sKey);
+      body.appendChild(wrap);
+    });
+  }
+}
+
+function renderPriorityItem(entry, list, groupKey, scopeKey) {
   const { kind, id, item, taskId } = entry;
   const parent = kind === "subtask" ? tasks[taskId] : item;
   const project = parent ? projects[parent.projectId] : null;
@@ -1299,12 +1502,12 @@ function renderPriorityItem(entry, list, groupKey) {
   wrap.appendChild(header);
   if (isExpanded) wrap.appendChild(renderPriorityDetail(kind, id, item, taskId, parent));
 
-  wrap.addEventListener("dragstart", (e) => { dragState = { id, kind, groupKey }; wrap.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
+  wrap.addEventListener("dragstart", (e) => { dragState = { id, kind, scopeKey }; wrap.classList.add("dragging"); e.dataTransfer.effectAllowed = "move"; });
   wrap.addEventListener("dragend", () => { wrap.classList.remove("dragging"); dragState = null; });
-  wrap.addEventListener("dragover", (e) => { e.preventDefault(); });
+  wrap.addEventListener("dragover", (e) => { if (dragState && dragState.scopeKey === scopeKey) e.preventDefault(); });
   wrap.addEventListener("drop", (e) => {
     e.preventDefault();
-    if (!dragState || dragState.groupKey !== groupKey) return;
+    if (!dragState || dragState.scopeKey !== scopeKey) return;
     const fromIdx = list.findIndex(en => en.id === dragState.id && en.kind === dragState.kind);
     const toIdx = list.findIndex(en => en.id === id && en.kind === kind);
     if (fromIdx === -1 || toIdx === -1 || fromIdx === toIdx) return;
@@ -1321,6 +1524,10 @@ function escapeHtml(str) { const div = document.createElement("div"); div.textCo
 function escapeAttr(str) { return (str || "").replace(/"/g, "&quot;"); }
 
 document.getElementById("add-project-btn").addEventListener("click", addProject);
+document.getElementById("my-name-select").addEventListener("change", (e) => {
+  if (!currentUser || !currentUser.uid) return;
+  db.ref("state/userPrefs/" + currentUser.uid + "/myName").set(e.target.value);
+});
 </script>
 </body>
 </html>
